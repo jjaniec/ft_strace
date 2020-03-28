@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by joffreyjani       #+#    #+#              #
-#    Updated: 2020/03/27 19:54:32 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/03/28 16:15:02 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,8 @@ NAME = ft_strace
 UNAME_S := $(shell uname -s)
 
 SRC_NAME =	main.c \
-			resolve_path.c
+			resolve_path.c \
+			ft_strace.c
 
 SRC_DIR = ./srcs/
 INCLUDES_DIR = ./includes/

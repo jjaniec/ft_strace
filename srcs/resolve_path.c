@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/03/27 19:36:56 by joffreyjani       #+#    #+#             */
-/*   Updated: 2020/03/27 19:56:49 by jjaniec          ###   ########.fr       */
+/*   Created: 2020/03/28 16:32:51 by jjaniec           #+#    #+#             */
+/*   Updated: 2020/03/28 16:32:52 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,7 @@ static bool		is_path_valid(char *exec)
 	struct stat		exec_stat;
 
 	if (lstat(exec, &exec_stat) == -1)
-	{
-		perror("lstat");
 		return (false);
-	}
 	return (true);
 }
 
@@ -62,7 +59,6 @@ char	*resolve_path(char *cmd, char **environ)
 		ft_strcpy(buffer, *path_dirs);
 		buffer[path_len] = '/';
 		ft_strcpy(buffer + path_len + 1, cmd);
-		printf("\t%s\n", buffer);
 		if (is_path_valid(buffer))
 			return (ft_strdup(buffer));
 		path_dirs++;
