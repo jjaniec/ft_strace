@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 00:01:54 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 00:07:23 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ int		main(int ac, char **av, char **environ)
 	{
 		write(STDERR_FILENO, ERR_PREFIX, ft_strlen(ERR_PREFIX));
 		write(STDERR_FILENO, av[1], ft_strlen(av[1]));
-		write(STDERR_FILENO, ": not found\n", 11);
+		write(STDERR_FILENO, ": not found\n", 12);
+		return (1);
 	}
 	ft_printf(OK_PREFIX "Using binary: %s\n", exec_path);
 	return (ft_strace(exec_path, (char *[2]){exec_path, NULL}, environ));

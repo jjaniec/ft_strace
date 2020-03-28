@@ -6,14 +6,14 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 00:01:13 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 00:41:01 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
 void	*g_syscall_table[329][3] = {
-	{"read", "sys_read", "fs/read_write.c"},
+	{ "read", "sys_read", "fs/read_write.c" },
 	{ "write", "sys_write", "fs/read_write.c" },
 	{ "open", "sys_open", "fs/open.c" },
 	{ "close", "sys_close", "fs/open.c" },
@@ -358,38 +358,52 @@ static int	child_process_tasks(char *exec_path, char **exec_args, char **exec_en
 ** https://docs.huihoo.com/doxygen/linux/kernel/3.7/structuser__regs__struct.html
 */
 
-static int	print_syscall_info(struct user_regs_struct *user_regs)
+static int	print_syscall_info(pid_t process, struct user_regs_struct *pre_user_regs, \
+				struct user_regs_struct *post_user_regs)
 {
-	ft_printf(INFO_PREFIX "Call %s (%d/%s <%s>) with %d args: \n\t=>", \
-		g_syscall_table[user_regs->orig_rax][0], user_regs->orig_rax, \
-		g_syscall_table[user_regs->orig_rax][1], g_syscall_table[user_regs->orig_rax][2], 0 /* todo */);
+	ft_printf(INFO_PREFIX "[%d] => %s (%ld/%s <%s>)", \
+		process, g_syscall_table[pre_user_regs->orig_rax][0], \
+		pre_user_regs->orig_rax, g_syscall_table[pre_user_regs->orig_rax][1], \
+		g_syscall_table[pre_user_regs->orig_rax][2]);
+	ft_printf(" (%ld %ld %ld %ld %ld %ld) ", \
+		pre_user_regs->rdi, pre_user_regs->rsi, pre_user_regs->rdx, \
+		pre_user_regs->r10, pre_user_regs->r8, pre_user_regs->r9);
+	ft_printf("= %x;", post_user_regs->rax);
 	write(STDOUT_FILENO, "\n", 1);
+	return (0);
 }
 
 /*
 ** Set ptrace options & read user section to gather syscall numbers & parameters
 */
 
+static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
+{
+
+	ptrace(PTRACE_SYSCALL, process, 0, 0);
+	// ptrace(PTRACE_SETOPTIONS, process, 0, PTRACE_O_EXITKILL);
+	waitpid(process, status, 0);
+	if (WIFEXITED(*status))
+	{
+		ft_printf(INFO_PREFIX "[%d] exited with code: %d\n", process, *status);
+		return (1);
+	}
+	ptrace(PTRACE_GETREGS, process, 0, user_regs);
+	return (0);
+}
+
 static int	handle_child(pid_t child)
 {
-	struct user_regs_struct		user_regs;
+	struct user_regs_struct		pre_user_regs;
+	struct user_regs_struct		post_user_regs;
 	int 						status;
 
 	while (1)
 	{
-		ptrace(PTRACE_SYSCALL, child, 0, 0);
-		ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_EXITKILL);
-		ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACEFORK);
-		waitpid(child, &status, 0);
-		if (WIFEXITED(status))
-		{
-			ft_printf(OK_PREFIX "Child exited with code: %d\n", status);
-			return (0);
-		}
-		ptrace(PTRACE_GETREGS, child, 0, &user_regs);
-		print_syscall_info(&user_regs);
-		ptrace(PTRACE_CONT, child, NULL, NULL);
-		return (0);
+		if (cont_process(child, &status, &pre_user_regs) || \
+			cont_process(child, &status, &post_user_regs))
+			break ;
+		print_syscall_info(child, &pre_user_regs, &post_user_regs);
 	}
 	return (1);
 }
