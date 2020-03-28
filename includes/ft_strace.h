@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/28 16:47:40 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 00:01:56 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,14 @@
 // Buffer len used for path resolution of executables passed as arguments
 # define PATH_RES_BUFF_LEN	1024
 
-# define ERR_PREFIX			"\e[31mft_strace\e[39m: "
-# define INFO_PREFIX		"\e[39mft_strace\e[39m: "
+# define ERR_PREFIX			"[\e[31m*\e[39m] ft_strace: "
+# define OK_PREFIX			"[\e[32m*\e[39m] ft_strace: "
+# define INFO_PREFIX		"[\e[34m*\e[39m] "
+
+/*
+** Documentation
+** https://nullprogram.com/blog/2018/06/23/
+*/
 
 int			ft_strace(char *exec_path, char **exec_args, char **exec_environ);
 

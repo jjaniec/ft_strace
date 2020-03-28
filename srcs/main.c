@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/28 16:27:50 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 00:01:54 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 static int		show_usage(void)
 {
-	write(STDOUT_FILENO, INFO_PREFIX "Usage: ./ft_ptrace [-hc] binary\n", \
-		ft_strlen(INFO_PREFIX) + 32);
+	write(STDOUT_FILENO, OK_PREFIX "Usage: ./ft_ptrace [-hc] binary\n", \
+		ft_strlen(OK_PREFIX) + 32);
 }
 
 int		main(int ac, char **av, char **environ)
@@ -35,6 +35,6 @@ int		main(int ac, char **av, char **environ)
 		write(STDERR_FILENO, av[1], ft_strlen(av[1]));
 		write(STDERR_FILENO, ": not found\n", 11);
 	}
-	ft_printf(INFO_PREFIX "using binary: %s\n", exec_path);
+	ft_printf(OK_PREFIX "Using binary: %s\n", exec_path);
 	return (ft_strace(exec_path, (char *[2]){exec_path, NULL}, environ));
 }
