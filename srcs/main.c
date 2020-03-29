@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 21:29:23 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 21:48:46 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,5 +41,5 @@ int		main(int ac, char **av, char **environ)
 		return (1);
 	}
 	ft_printf(OK_PREFIX "Using binary: %s\n", exec_path);
-	return (ft_strace(exec_path, cmd_args, environ));
+	return (ft_strace(&opts, exec_path, cmd_args, environ));
 }

@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 21:18:42 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 21:47:16 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ typedef struct	s_ft_strace_opts {
 ** https://nullprogram.com/blog/2018/06/23/
 */
 
-int			ft_strace(char *exec_path, char **exec_args, char **exec_environ);
+int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char **exec_environ);
 
 char		*resolve_path(char *cmd, char **environ);
 

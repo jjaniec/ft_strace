@@ -9,7 +9,8 @@ RUN			apt-get update -yqq && \
 					binutils \
 					gcc \
 					build-essential \
-					psmisc && \
+					psmisc \
+					strace && \
 			rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["bash"]

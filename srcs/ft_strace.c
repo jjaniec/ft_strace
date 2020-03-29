@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 21:31:17 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/30 00:20:00 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,6 +347,7 @@ static int	handle_execve_err(void)
 
 static int	child_process_tasks(char *exec_path, char **exec_args, char **exec_environ)
 {
+	raise(SIGSTOP);
 	if (execve(exec_path, exec_args, exec_environ) == -1)
 		return (handle_execve_err());
 	return (1);
@@ -360,61 +361,108 @@ static int	child_process_tasks(char *exec_path, char **exec_args, char **exec_en
 static int	print_syscall_info(pid_t process, struct user_regs_struct *pre_user_regs, \
 				struct user_regs_struct *post_user_regs)
 {
-	ft_printf(INFO_PREFIX "[%d] => %s (%ld/%s <%s>)", \
+	ft_printf(INFO_PREFIX "[%d] => %s\t(%ld/%s <%s>)", \
 		process, g_syscall_table[pre_user_regs->orig_rax][0], \
 		pre_user_regs->orig_rax, g_syscall_table[pre_user_regs->orig_rax][1], \
 		g_syscall_table[pre_user_regs->orig_rax][2]);
-	ft_printf(" (%ld %ld %ld %ld %ld %ld) ", \
+	ft_printf("\t(rdi=0x%lx rsi=0x%lx rdx=0x%lx r10=0x%lx r8=0x%lx r9=0x%lx) ", \
 		pre_user_regs->rdi, pre_user_regs->rsi, pre_user_regs->rdx, \
 		pre_user_regs->r10, pre_user_regs->r8, pre_user_regs->r9);
-	ft_printf("= %ld;", post_user_regs->rax);
+	ft_printf("= 0x%x;", post_user_regs->rax);
 	write(STDOUT_FILENO, "\n", 1);
 	return (0);
 }
 
 /*
 ** Set ptrace options & read user section to gather syscall numbers & parameters
+**
+** PTRACE_GETREGS, PTRACE_GETFPREGS:
+** Copy the tracee's general-purpose or floating-point registers,
+** respectively, to the address data in the tracer.
+**
+** waitpid macro int WSTOPSIG (int status):
+** If WIFSTOPPED is true of status, this macro returns
+** the signal number of the signal that caused the child process to stop.
 */
 
 static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
 {
-
 	ptrace(PTRACE_SYSCALL, process, 0, 0);
-	// ptrace(PTRACE_SETOPTIONS, process, 0, PTRACE_O_EXITKILL);
 	waitpid(process, status, 0);
-	if (WIFEXITED(*status))
+	if (WSTOPSIG(*status) & (SIGTRAP | 0x80))
 	{
-		ft_printf(INFO_PREFIX "[%d] exited with code: %d\n", process, *status);
-		return (1);
+		ptrace(PTRACE_GETREGS, process, 0, user_regs);
+		return (0);
 	}
-	ptrace(PTRACE_GETREGS, process, 0, user_regs);
-	return (0);
+	if (WIFEXITED(*status))
+		return (1);
+	return (2);
 }
 
-static int	handle_child(pid_t child)
+/*
+** PTRACE_SEIZE:
+** Since Linux 3.4, PTRACE_SEIZE can be used instead of PTRACE_ATTACH.
+** PTRACE_SEIZE does not stop the attached process.  If you need to stop
+** it after attach (or at any other time) without sending it any sig‐
+** nals, use PTRACE_INTERRUPT command.
+**
+** PTRACE_O_TRACESYSGOOD:
+** When delivering system call traps, set bit 7 in the
+** signal number (i.e., deliver SIGTRAP|0x80).  This makes
+** it easy for the tracer to distinguish normal traps from
+** those caused by a system call.
+**
+** PTRACE_SYSCALL, PTRACE_SINGLESTEP:
+** Restart the stopped tracee as for PTRACE_CONT, but arrange for
+** the tracee to be stopped at the next entry to or exit from a
+** system call, or after execution of a single instruction,
+** respectively.  (The tracee will also, as usual, be stopped
+** upon receipt of a signal.)  From the tracer's perspective, the
+** tracee will appear to have been stopped by receipt of a SIG‐
+** TRAP.
+**
+** PTRACE_CONT:
+** Restart the stopped tracee process.
+*/
+
+static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 {
 	struct user_regs_struct		pre_user_regs;
 	struct user_regs_struct		post_user_regs;
 	int 						status;
 
 	ptrace(PTRACE_SEIZE, child, 0, 0);
+	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
 	ptrace(PTRACE_INTERRUPT, child, 0, 0);
-	while (1)
+	if (!opts->c)
+	{
+		ptrace(PTRACE_SYSCALL, child, 0, 0);
+		waitpid(child, &status, 0);
+	}
+	while (opts->c != 0)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
 			cont_process(child, &status, &post_user_regs))
 			break ;
 		print_syscall_info(child, &pre_user_regs, &post_user_regs);
+		opts->c--;
 	}
+	if (!opts->c)
+	{
+		ptrace(PTRACE_CONT, child, 0, 0);
+		waitpid(child, &status, 0);
+	}
+	if (WIFEXITED(status))
+		ft_printf(INFO_PREFIX "[%d] exited with code: %d\n", child, status);
 	return (1);
 }
 
 /*
 ** Fork, start the program passed as arguments in the child process
-** And monitor the child in the main process
+** and monitor the child in the main process
 */
 
-int			ft_strace(char *exec_path, char **exec_args, char **exec_environ)
+int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char **exec_environ)
 {
 	pid_t	child;
 
@@ -423,8 +471,11 @@ int			ft_strace(char *exec_path, char **exec_args, char **exec_environ)
 		write(STDERR_FILENO, ERR_PREFIX "Fork failed!\n", ft_strlen(ERR_PREFIX) + 13);
 		return (1);
 	}
-	else if (child == 0)
-		return (child_process_tasks(exec_path, exec_args, exec_environ));
-	ft_printf(OK_PREFIX "Child pid: %d\n", child);
-	return (handle_child(child));
+	if (child)
+	{
+		ft_printf(OK_PREFIX "Child pid: %d\n", child);
+		return (handle_child(opts, child));
+	}
+	return (child_process_tasks(exec_path, exec_args, exec_environ));
+
 }
