@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 00:41:01 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 21:31:17 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,7 +347,6 @@ static int	handle_execve_err(void)
 
 static int	child_process_tasks(char *exec_path, char **exec_args, char **exec_environ)
 {
-	ptrace(PTRACE_TRACEME, 0, NULL, 0);
 	if (execve(exec_path, exec_args, exec_environ) == -1)
 		return (handle_execve_err());
 	return (1);
@@ -368,7 +367,7 @@ static int	print_syscall_info(pid_t process, struct user_regs_struct *pre_user_r
 	ft_printf(" (%ld %ld %ld %ld %ld %ld) ", \
 		pre_user_regs->rdi, pre_user_regs->rsi, pre_user_regs->rdx, \
 		pre_user_regs->r10, pre_user_regs->r8, pre_user_regs->r9);
-	ft_printf("= %x;", post_user_regs->rax);
+	ft_printf("= %ld;", post_user_regs->rax);
 	write(STDOUT_FILENO, "\n", 1);
 	return (0);
 }
@@ -398,6 +397,8 @@ static int	handle_child(pid_t child)
 	struct user_regs_struct		post_user_regs;
 	int 						status;
 
+	ptrace(PTRACE_SEIZE, child, 0, 0);
+	ptrace(PTRACE_INTERRUPT, child, 0, 0);
 	while (1)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \

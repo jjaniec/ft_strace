@@ -6,36 +6,40 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 00:07:23 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/03/29 21:29:23 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-static int		show_usage(void)
+static void		show_usage(void)
 {
-	write(STDOUT_FILENO, OK_PREFIX "Usage: ./ft_ptrace [-hc] binary\n", \
-		ft_strlen(OK_PREFIX) + 32);
+	write(STDOUT_FILENO, INFO_PREFIX "Usage: ./ft_ptrace [-c syscall_count] -- binary arg1 arg2 arg3 ...\n", \
+		ft_strlen(INFO_PREFIX) + 67);
 }
 
 int		main(int ac, char **av, char **environ)
 {
-	char	*exec_path;
+	char				*exec_path;
+	char				**cmd_args;
+	t_ft_strace_opts	opts;
 
 	(void)ac;
 	(void)av;
-	if (!(ac > 1))
+	opts.c = -1;
+	cmd_args = parse_opts(&opts, ac, av);
+	if (!(ac > 1 && cmd_args && *cmd_args))
 	{
 		show_usage();
 		return (1);
 	}
-	if (!(exec_path = resolve_path(av[1], environ)))
+	if (!(exec_path = resolve_path(*cmd_args, environ)))
 	{
 		write(STDERR_FILENO, ERR_PREFIX, ft_strlen(ERR_PREFIX));
-		write(STDERR_FILENO, av[1], ft_strlen(av[1]));
+		write(STDERR_FILENO, *cmd_args, ft_strlen(*cmd_args));
 		write(STDERR_FILENO, ": not found\n", 12);
 		return (1);
 	}
 	ft_printf(OK_PREFIX "Using binary: %s\n", exec_path);
-	return (ft_strace(exec_path, (char *[2]){exec_path, NULL}, environ));
+	return (ft_strace(exec_path, cmd_args, environ));
 }
