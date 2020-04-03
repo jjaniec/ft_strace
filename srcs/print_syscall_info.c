@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 23:48:34 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 23:48:41 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,6 +391,8 @@ static int		print_valid_syscall(pid_t process, struct user_regs_struct *pre_user
 		});
 	write(STDOUT_FILENO, " = ", 3);
 	format_reg_value(table[pre_user_regs->orig_rax].reg_ret_type, post_user_regs->rax, 0);
+	if (table[pre_user_regs->orig_rax].reg_ret_type == INT && (int)post_user_regs->rax <= -1)
+		ft_printf(" %s %s", tostring_errnum(post_user_regs->rax), ft_strerror(post_user_regs->rax));
 	return (0);
 }
 

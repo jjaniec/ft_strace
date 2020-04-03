@@ -5,8 +5,8 @@
 #                                                     +:+ +:+         +:+      #
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2020/03/27 18:10:31 by joffreyjani       #+#    #+#              #
-#    Updated: 2020/04/03 16:35:57 by jjaniec          ###   ########.fr        #
+#    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
+#    Updated: 2020/04/03 20:00:21 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,8 @@ SRC_NAME =	main.c \
 			resolve_path.c \
 			ft_strace.c \
 			print_syscall_info.c \
-			parse_opts.c
+			parse_opts.c \
+			ft_strerror.c
 
 SRC_DIR = ./srcs/
 INCLUDES_DIR = ./includes/

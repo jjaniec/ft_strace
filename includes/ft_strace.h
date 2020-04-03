@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 18:43:09 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 19:59:46 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,4 +76,11 @@ char		**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
 
 int			print_syscall_info(pid_t process, struct user_regs_struct *pre_user_regs, \
 				struct user_regs_struct *post_user_regs);
+
+// ft_strerror.c
+
+char		*ft_strerror(int errnum);
+
+char		*tostring_errnum(int errnum);
+
 #endif
