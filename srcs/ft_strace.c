@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 20:25:53 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 23:41:31 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,12 @@ static int	handle_execve_err(void)
 ** Tell ptrace to trace the process and start the program passed as arguments
 */
 
-static int	child_process_tasks(char *exec_path, char **exec_args, char **exec_environ)
+static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_environ)
 {
 	raise(SIGSTOP);
+	// pause();
 	if (execve(exec_path, exec_args, exec_environ) == -1)
-		return (handle_execve_err());
-	return (1);
+		exit(1);
 }
 
 /*
@@ -159,6 +159,6 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 		ft_printf(OK_PREFIX "Child pid: %d\n", child);
 		return (handle_child(opts, child));
 	}
-	return (child_process_tasks(exec_path, exec_args, exec_environ));
-
+	child_process_tasks(exec_path, exec_args, exec_environ);
+	return (0);
 }

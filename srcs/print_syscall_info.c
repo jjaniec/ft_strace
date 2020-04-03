@@ -6,13 +6,12 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 19:06:25 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 23:48:34 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-// void	*g_syscall_table_64[329][6] = {
 t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "read", "sys_read", "fs/read_write.c", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
 	{ "write", "sys_write", "fs/read_write.c", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
@@ -23,7 +22,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "lstat", "sys_newlstat", "fs/stat.c", {STR, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "poll", "sys_poll", "fs/select.c", {PTR, UINT, INT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "lseek", "sys_lseek", "fs/read_write.c", {INT, LONG, INT, UNDEF, UNDEF, UNDEF}, LONG },
-	{ "mmap", "sys_mmap", "arch/x86/kernel/sys_x86_64.c", {PTR, SIZE_T, PROT, MAP, INT, HEX} , PTR },
+	{ "mmap", "sys_mmap", "arch/x86/kernel/sys_x86_64.c", {PTR, SIZE_T, PROT, MAP, INT, HEX}, PTR },
 	{ "mprotect", "sys_mprotect", "mm/mprotect.c", {PTR, SIZE_T, PROT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "munmap", "sys_munmap", "mm/mmap.c", {PTR, SIZE_T, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "brk", "sys_brk", "mm/mmap.c", {PTR, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, PTR },
@@ -34,7 +33,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "pread64", "sys_pread64", "fs/read_write.c", {INT, STR, SIZE_T, LONG, UNDEF, UNDEF}, SSIZE_T },
 	{ "pwrite64", "sys_pwrite64", "fs/read_write.c", {INT, STR, SIZE_T, LONG, UNDEF, UNDEF}, SSIZE_T },
 	{ "readv", "sys_readv", "fs/read_write.c", {INT, PTR, INT, UNDEF, UNDEF, UNDEF}, SSIZE_T },
-	{ "writev", "sys_writev", "fs/read_write.c", {INT, PTR, INT, UNDEF, UNDEF, UNDEF} , SSIZE_T },
+	{ "writev", "sys_writev", "fs/read_write.c", {INT, PTR, INT, UNDEF, UNDEF, UNDEF}, SSIZE_T },
 	{ "access", "sys_access", "fs/open.c", {STR, INT, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "pipe", "sys_pipe", "fs/pipe.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "select", "sys_select", "fs/select.c", {INT, PTR, PTR, PTR, PTR, UNDEF}, INT },
@@ -75,7 +74,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "vfork", "stub_vfork", "kernel/fork.c", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "execve", "stub_execve", "fs/exec.c", {STR, STR, STR, UNDEF, UNDEF, UNDEF}, INT },
 	{ "exit", "sys_exit", "kernel/exit.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
-	{ "wait4", "sys_wait4", "kernel/exit.c", {INT, PTR, INT, PTR, UNDEF, UNDEF} , INT },
+	{ "wait4", "sys_wait4", "kernel/exit.c", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 	{ "kill", "sys_kill", "kernel/signal.c", {INT, INT, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "uname", "sys_newuname", "kernel/sys.c", {PTR, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "semget", "sys_semget", "ipc/sem.c", {INT, INT, INT, UNDEF, UNDEF, UNDEF}, INT },
@@ -92,7 +91,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "fdatasync", "sys_fdatasync", "fs/sync.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "truncate", "sys_truncate", "fs/open.c", {STR, LONG, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "ftruncate", "sys_ftruncate", "fs/open.c", {INT, LONG, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
-	{ "getdents", "sys_getdents", "fs/readdir.c", {UINT, PTR, UINT, UNDEF, UNDEF, UNDEF} , INT },
+	{ "getdents", "sys_getdents", "fs/readdir.c", {UINT, PTR, UINT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "getcwd", "sys_getcwd", "fs/dcache.c", {STR, SIZE_T, UNDEF, UNDEF, UNDEF, UNDEF}, PTR },
 	{ "chdir", "sys_chdir", "fs/open.c", {STR, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "fchdir", "sys_fchdir", "fs/open.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
@@ -241,7 +240,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "timer_gettime", "sys_timer_gettime", "kernel/posix-timers.c", {INT, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "timer_getoverrun", "sys_timer_getoverrun", "kernel/posix-timers.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "timer_delete", "sys_timer_delete", "kernel/posix-timers.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
-	{ "clock_settime", "sys_clock_settime", "kernel/posix-timers.c", {INT, PTR, UNDEF, UNDEF, UNDEF, UNDEF} , INT },
+	{ "clock_settime", "sys_clock_settime", "kernel/posix-timers.c", {INT, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "clock_gettime", "sys_clock_gettime", "kernel/posix-timers.c", {INT, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "clock_getres", "sys_clock_getres", "kernel/posix-timers.c", {INT, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "clock_nanosleep", "sys_clock_nanosleep", "kernel/posix-timers.c", {INT, INT, PTR, PTR, UNDEF, UNDEF}, INT },
@@ -284,7 +283,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "readlinkat", "sys_readlinkat", "fs/stat.c", {INT, STR, STR, SIZE_T, UNDEF, UNDEF}, SSIZE_T },
 	{ "fchmodat", "sys_fchmodat", "fs/open.c", {INT, STR, INT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "faccessat", "sys_faccessat", "fs/open.c", {INT, STR, INT, UNDEF, UNDEF, UNDEF}, INT },
-	{ "pselect6", "sys_pselect6", "fs/select.c", {INT, PTR, PTR, PTR, PTR, PTR} , INT },
+	{ "pselect6", "sys_pselect6", "fs/select.c", {INT, PTR, PTR, PTR, PTR, PTR}, INT },
 	{ "ppoll", "sys_ppoll", "fs/select.c", {PTR, UINT, PTR, PTR, UNDEF, UNDEF}, INT },
 	{ "unshare", "sys_unshare", "kernel/fork.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "set_robust_list", "sys_set_robust_list", "kernel/futex.c", {PTR, SIZE_T, UNDEF, UNDEF, UNDEF, UNDEF}, LONG },
@@ -326,7 +325,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "getcpu", "sys_getcpu", "kernel/sys.c", {PTR, PTR, PTR, UNDEF, UNDEF, UNDEF}, INT },
 	{ "process_vm_readv", "sys_process_vm_readv", "mm/process_vm_access.c", {INT, PTR, ULONG, PTR, ULONG, ULONG}, SSIZE_T },
 	{ "process_vm_writev", "sys_process_vm_writev", "mm/process_vm_access.c", {INT, PTR, ULONG, PTR, ULONG, ULONG}, SSIZE_T },
-	{ "kcmp", "sys_kcmp", "kernel/kcmp.c", {INT, INT, INT, ULONG, ULONG, UNDEF} , INT },
+	{ "kcmp", "sys_kcmp", "kernel/kcmp.c", {INT, INT, INT, ULONG, ULONG, UNDEF}, INT },
 	{ "finit_module", "sys_finit_module", "kernel/module.c", {INT, STR, INT, UNDEF, UNDEF, UNDEF}, INT }
 };
 
@@ -372,11 +371,9 @@ static int		cycle_syscall_params(int syscall_reg_types[6], unsigned long pre_use
 	for (unsigned int i = 0; i < 6; i++)
 	{
 		if (format_reg_value(syscall_reg_types[i], pre_user_regs[i], i) == 0)
-		{
-			write(STDOUT_FILENO, ")", 1);
 			break ;
-		}
 	}
+	write(STDOUT_FILENO, ")", 1);
 	return (0);
 }
 
@@ -394,7 +391,6 @@ static int		print_valid_syscall(pid_t process, struct user_regs_struct *pre_user
 		});
 	write(STDOUT_FILENO, " = ", 3);
 	format_reg_value(table[pre_user_regs->orig_rax].reg_ret_type, post_user_regs->rax, 0);
-	write(STDOUT_FILENO, ";", 1);
 	return (0);
 }
 
