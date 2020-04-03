@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 16:34:55 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 19:00:17 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 		waitpid(child, &status, 0);
 	}
 	if (WIFEXITED(status))
-		ft_printf(INFO_PREFIX "[%d] exited with code: %d\n", child, status);
+		ft_printf(INFO_PREFIX "[%d] exited with %d\n", child, status);
 	return (1);
 }
 

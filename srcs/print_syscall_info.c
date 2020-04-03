@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 18:43:42 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 19:06:25 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,10 +360,7 @@ static int		format_reg_value(int type, unsigned int reg_value, unsigned int reg_
 	if (reg_index != 0)
 		write(STDOUT_FILENO, ", ", 2);
 	if ((fmt_index = ft_int_index(printf_fmt_types, 9, type)) != -1)
-	{
-		// ft_printf("fmt_index: %d\n", fmt_index);
 		ft_printf(printf_fmt_types_str[fmt_index], reg_value);
-	}
 	else
 		ft_printf("%s", "TODO");
 	return (1);
@@ -387,16 +384,17 @@ static int		print_valid_syscall(pid_t process, struct user_regs_struct *pre_user
 					struct user_regs_struct *post_user_regs, t_ft_strace_syscall *table)
 {
 	fflush(stdout);
-	ft_printf(INFO_PREFIX "[%d] => %s\t(%ld/%s <%s>)\t", \
-		process, table[pre_user_regs->orig_rax].name, \
-		pre_user_regs->orig_rax, table[pre_user_regs->orig_rax].full_name, \
-		table[pre_user_regs->orig_rax].libpath);
+	ft_printf(INFO_PREFIX "[%d] => (%3ld) %s", \
+		process, pre_user_regs->orig_rax, table[pre_user_regs->orig_rax].name);
+	// table[pre_user_regs->orig_rax].full_name, table[pre_user_regs->orig_rax].libpath
 	cycle_syscall_params(table[pre_user_regs->orig_rax].reg_types, \
 		(unsigned long[6]) {
 			pre_user_regs->rdi, pre_user_regs->rsi, pre_user_regs->rdx, \
 			pre_user_regs->r10, pre_user_regs->r8, pre_user_regs->r9
 		});
-	ft_printf(" = 0x%x;", post_user_regs->rax);
+	write(STDOUT_FILENO, " = ", 3);
+	format_reg_value(table[pre_user_regs->orig_rax].reg_ret_type, post_user_regs->rax, 0);
+	write(STDOUT_FILENO, ";", 1);
 	return (0);
 }
 
