@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 19:00:17 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 20:25:53 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,25 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 }
 
 /*
+** Apply sigmask to block
+*/
+
+static int			init_sigs(void)
+{
+	sigset_t	sigmask;
+
+	sigemptyset(&sigmask);
+	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigaddset(&sigmask, SIGINT);
+	sigaddset(&sigmask, SIGQUIT);
+	sigaddset(&sigmask, SIGTERM);
+	sigaddset(&sigmask, SIGHUP);
+	sigaddset(&sigmask, SIGPIPE);
+	sigprocmask(SIG_BLOCK, &sigmask, NULL);
+	return (0);
+}
+
+/*
 ** Fork, start the program passed as arguments in the child process
 ** and monitor the child in the main process
 */
@@ -129,6 +148,7 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 {
 	pid_t	child;
 
+	init_sigs();
 	if ((child = fork()) == -1)
 	{
 		write(STDERR_FILENO, ERR_PREFIX "Fork failed!\n", ft_strlen(ERR_PREFIX) + 13);
