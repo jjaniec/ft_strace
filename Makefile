@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by joffreyjani       #+#    #+#              #
-#    Updated: 2020/03/29 21:18:57 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/03 16:35:57 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ UNAME_S := $(shell uname -s)
 SRC_NAME =	main.c \
 			resolve_path.c \
 			ft_strace.c \
+			print_syscall_info.c \
 			parse_opts.c
 
 SRC_DIR = ./srcs/

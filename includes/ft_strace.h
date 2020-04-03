@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 21:47:16 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/03 18:43:09 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,34 @@ typedef struct	s_ft_strace_opts {
 	int			c;
 }				t_ft_strace_opts;
 
+typedef struct	s_ft_strace_syscall {
+	char		*name;
+	char		*full_name;
+	char		*libpath;
+	int			reg_types[6];
+	int			reg_ret_type;
+}				t_ft_strace_syscall;
+
+// Syscall parameters / returns types
+
+enum e_systypes	{
+	INT,
+	STR,
+	SIZE_T,
+	SSIZE_T,
+	PTR,
+	LONG,
+	STRUCT,
+	UINT,
+	VOID,
+	FLAGS,
+	UNDEF,
+	PROT,
+	HEX,
+	ULONG,
+	MAP
+};
+
 /*
 ** Documentation
 ** https://nullprogram.com/blog/2018/06/23/
@@ -46,4 +74,6 @@ char		*resolve_path(char *cmd, char **environ);
 
 char		**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
 
+int			print_syscall_info(pid_t process, struct user_regs_struct *pre_user_regs, \
+				struct user_regs_struct *post_user_regs);
 #endif
