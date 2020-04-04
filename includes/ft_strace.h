@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 18:28:40 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 18:51:20 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 # define OK_PREFIX			"[\e[32m*\e[39m] ft_strace: "
 # define INFO_PREFIX		"[\e[34m*\e[39m] "
 
-# define STR_BUFFER_LEN		64 // 4096
+# define STR_BUFFER_LEN		256 // 4096
 
 # define PRE_SYSCALL_REGS	true
 # define POST_SYSCALL_REGS	false

@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 18:27:33 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 18:50:58 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 static int	handle_execve_err(void)
 {
-	ft_printf(ERR_PREFIX "%s\n", strerror(errno));
+	ft_printf(ERR_PREFIX "%s\n", ft_strerror(errno));
 	exit(1);
 }
 

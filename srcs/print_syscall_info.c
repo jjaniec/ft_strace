@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 18:31:01 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 19:02:54 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,33 +346,29 @@ static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pr
 ** https://linuxgazette.net/issue81/sandeep.html
 */
 
-static int		print_string(pid_t child, unsigned int reg_value)
+static int		print_string(pid_t child, unsigned long reg_value)
 {
-	int				tmp;
-	unsigned int	read = 0;
+	unsigned long	tmp;
+	unsigned int	read;
 	char			buf[STR_BUFFER_LEN];
 
+	read = 0;
 	while (1)
 	{
-		// buf = ft_xmalloc(sizeof(char) * buffer_len);
 		errno = 0;
-		tmp = ptrace(PTRACE_PEEKDATA, child, reg_value + read, "ignored");
+		tmp = ptrace(PTRACE_PEEKDATA, child, reg_value + read);
 		if (errno)
 		{
 			printf("ptrace returned %x, %d\n", tmp, errno);
 			printf("%s", ft_strerror(errno));
-			// free(buf);
 			return (1);
 		}
 		ft_memcpy(buf + read, &tmp, sizeof(tmp));
-		if (ft_memchr(buf, 0, STR_BUFFER_LEN))
+		if (ft_memchr(&tmp, 0, sizeof(tmp)))
 			break ;
-		read += sizeof(tmp);
-		// ft_xrealloc(buf, buffer_len, (buffer_len *= buffer_len));
-		// buffer_len *= buffer_len;
-		// free(buf);
+		read += (unsigned int)sizeof(tmp);
 	}
-	if (read == (sizeof(buf) / sizeof(char)))
+	if (read == (sizeof(buf)))
 		ft_printf("\"%*s...\"", STR_BUFFER_LEN, buf);
 	else
 		ft_printf("\"%s\"", buf);
@@ -380,13 +376,13 @@ static int		print_string(pid_t child, unsigned int reg_value)
 }
 
 static int		format_reg_value(pid_t child, int type, \
-					unsigned int reg_value, unsigned int reg_index)
+					unsigned long reg_value, unsigned int reg_index)
 {
 	int			printf_fmt_types[] = {
-		INT, SIZE_T, SSIZE_T, PTR, LONG, UINT, HEX, ULONG
+		INT, SIZE_T, SSIZE_T, LONG, UINT, HEX, ULONG
 	};
 	char		*printf_fmt_types_str[] = {
-		"%d", "%zu", "%zd", "%p", "%ld", "%u", "%x", "%lu"
+		"%d", "%zu", "%zd", "%ld", "%u", "%x", "%lu"
 	};
 	int			fmt_index;
 
@@ -394,8 +390,12 @@ static int		format_reg_value(pid_t child, int type, \
 		return (0);
 	if (reg_index != 0)
 		write(STDOUT_FILENO, ", ", 2);
-	if ((fmt_index = ft_int_index(printf_fmt_types, 9, type)) != -1)
+	if ((fmt_index = ft_int_index(printf_fmt_types, (sizeof(printf_fmt_types) / sizeof(int)), type)) != -1)
 		ft_printf(printf_fmt_types_str[fmt_index], reg_value);
+	else if (type == PTR)
+		reg_value ? \
+			ft_printf("%p", reg_value) : \
+			ft_printf("NULL");
 	else if (type == STR)
 		print_string(child, reg_value);
 	else
