@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 23:41:31 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 18:27:33 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,7 @@
 
 static int	handle_execve_err(void)
 {
-	if (errno == EACCES)
-		write(STDERR_FILENO, ERR_PREFIX "Execution failed (EACCESS)\n", \
-			ft_strlen(ERR_PREFIX) + 27);
+	ft_printf(ERR_PREFIX "%s\n", strerror(errno));
 	exit(1);
 }
 
@@ -33,7 +31,7 @@ static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_e
 	raise(SIGSTOP);
 	// pause();
 	if (execve(exec_path, exec_args, exec_environ) == -1)
-		exit(1);
+		handle_execve_err();
 }
 
 /*
@@ -105,9 +103,11 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 	while (opts->c != 0)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
-			cont_process(child, &status, &post_user_regs))
+			print_syscall_info(child, PRE_SYSCALL_REGS, &pre_user_regs) || \
+			cont_process(child, &status, &post_user_regs) || \
+			print_syscall_info(child, POST_SYSCALL_REGS, &post_user_regs))
 			break ;
-		print_syscall_info(child, &pre_user_regs, &post_user_regs);
+		// print_syscall_info(child, &pre_user_regs, &post_user_regs);
 		opts->c--;
 	}
 	if (!opts->c)

@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 19:59:46 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 18:28:40 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <unistd.h>
 # include <sys/reg.h>
 # include <sys/user.h>
+# include <stdio.h>
 
 // Buffer len used for path resolution of executables passed as arguments
 # define PATH_RES_BUFF_LEN	1024
@@ -30,6 +31,11 @@
 # define ERR_PREFIX			"[\e[31m*\e[39m] ft_strace: "
 # define OK_PREFIX			"[\e[32m*\e[39m] ft_strace: "
 # define INFO_PREFIX		"[\e[34m*\e[39m] "
+
+# define STR_BUFFER_LEN		64 // 4096
+
+# define PRE_SYSCALL_REGS	true
+# define POST_SYSCALL_REGS	false
 
 typedef struct	s_ft_strace_opts {
 	int			c;
@@ -74,8 +80,8 @@ char		*resolve_path(char *cmd, char **environ);
 
 char		**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
 
-int			print_syscall_info(pid_t process, struct user_regs_struct *pre_user_regs, \
-				struct user_regs_struct *post_user_regs);
+int			print_syscall_info(pid_t process, bool regs_type, \
+				struct user_regs_struct *user_regs);
 
 // ft_strerror.c
 

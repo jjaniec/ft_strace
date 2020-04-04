@@ -6,13 +6,14 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 16:15:39 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 18:31:01 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
 t_ft_strace_syscall	g_syscall_table_64[329] = {
+	// # include "syscall64.h"
 	{ "read", "sys_read", "fs/read_write.c", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
 	{ "write", "sys_write", "fs/read_write.c", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
 	{ "open", "sys_open", "fs/open.c", {STR, FLAGS, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
@@ -72,7 +73,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "clone", "stub_clone", "kernel/fork.c", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 	{ "fork", "stub_fork", "kernel/fork.c", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "vfork", "stub_vfork", "kernel/fork.c", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
-	{ "execve", "stub_execve", "fs/exec.c", {STR, STR, STR, UNDEF, UNDEF, UNDEF}, INT },
+	{ "execve", "stub_execve", "fs/exec.c", {STR, PTR, PTR, UNDEF, UNDEF, UNDEF}, INT },
 	{ "exit", "sys_exit", "kernel/exit.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
 	{ "wait4", "sys_wait4", "kernel/exit.c", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 	{ "kill", "sys_kill", "kernel/signal.c", {INT, INT, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
@@ -334,23 +335,58 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 ** https://docs.huihoo.com/doxygen/linux/kernel/3.7/structuser__regs__struct.html
 */
 
-static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pre_user_regs, \
-					struct user_regs_struct *post_user_regs)
+static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pre_user_regs)
 {
-	(void)post_user_regs;
-
 	ft_printf(ERR_PREFIX "[%d] => Invalid syscall id: %ld", \
 		process, pre_user_regs->orig_rax);
 	return (0);
 }
 
-static int		format_reg_value(int type, unsigned int reg_value, unsigned int reg_index)
+/*
+** https://linuxgazette.net/issue81/sandeep.html
+*/
+
+static int		print_string(pid_t child, unsigned int reg_value)
 {
-	int			printf_fmt_types[9] = {
-		INT, STR, SIZE_T, SSIZE_T, PTR, LONG, UINT, HEX, ULONG
+	int				tmp;
+	unsigned int	read = 0;
+	char			buf[STR_BUFFER_LEN];
+
+	while (1)
+	{
+		// buf = ft_xmalloc(sizeof(char) * buffer_len);
+		errno = 0;
+		tmp = ptrace(PTRACE_PEEKDATA, child, reg_value + read, "ignored");
+		if (errno)
+		{
+			printf("ptrace returned %x, %d\n", tmp, errno);
+			printf("%s", ft_strerror(errno));
+			// free(buf);
+			return (1);
+		}
+		ft_memcpy(buf + read, &tmp, sizeof(tmp));
+		if (ft_memchr(buf, 0, STR_BUFFER_LEN))
+			break ;
+		read += sizeof(tmp);
+		// ft_xrealloc(buf, buffer_len, (buffer_len *= buffer_len));
+		// buffer_len *= buffer_len;
+		// free(buf);
+	}
+	if (read == (sizeof(buf) / sizeof(char)))
+		ft_printf("\"%*s...\"", STR_BUFFER_LEN, buf);
+	else
+		ft_printf("\"%s\"", buf);
+	return (0);
+}
+
+static int		format_reg_value(pid_t child, int type, \
+					unsigned int reg_value, unsigned int reg_index)
+{
+	int			printf_fmt_types[] = {
+		INT, SIZE_T, SSIZE_T, PTR, LONG, UINT, HEX, ULONG
 	};
-	char		*printf_fmt_types_str[9] = {
-		"%d", "%p", "%zu", "%zd", "%p", "%ld", "%u", "%x", "%lu"
+	char		*printf_fmt_types_str[] = {
+		"%d", "%zu", "%zd", "%p", "%ld", "%u", "%x", "%lu"
 	};
 	int			fmt_index;
 
@@ -360,17 +396,19 @@ static int		format_reg_value(int type, unsigned int reg_value, unsigned int reg_
 		write(STDOUT_FILENO, ", ", 2);
 	if ((fmt_index = ft_int_index(printf_fmt_types, 9, type)) != -1)
 		ft_printf(printf_fmt_types_str[fmt_index], reg_value);
+	else if (type == STR)
+		print_string(child, reg_value);
 	else
 		ft_printf("%s", "TODO");
 	return (1);
 }
 
-static int		cycle_syscall_params(int syscall_reg_types[6], unsigned long pre_user_regs[6])
+static int		cycle_syscall_params(pid_t child, int syscall_reg_types[6], unsigned long pre_user_regs[6])
 {
 	write(STDOUT_FILENO, "(", 1);
 	for (unsigned int i = 0; i < 6; i++)
 	{
-		if (format_reg_value(syscall_reg_types[i], pre_user_regs[i], i) == 0)
+		if (format_reg_value(child, syscall_reg_types[i], pre_user_regs[i], i) == 0)
 			break ;
 	}
 	write(STDOUT_FILENO, ")", 1);
@@ -381,37 +419,48 @@ static int		cycle_syscall_params(int syscall_reg_types[6], unsigned long pre_use
 ** https://stackoverflow.com/questions/29047592/accessing-errno-h-in-assembly-language
 */
 
-static int		print_valid_syscall(pid_t process, struct user_regs_struct *pre_user_regs, \
-					struct user_regs_struct *post_user_regs, t_ft_strace_syscall *table)
+static int		print_valid_pre_syscall(pid_t process, struct user_regs_struct *user_regs, \
+					t_ft_strace_syscall *table)
 {
 	fflush(stdout);
 	ft_printf(INFO_PREFIX "[%d] => (%3ld) %s", \
-		process, pre_user_regs->orig_rax, table[pre_user_regs->orig_rax].name);
-	// table[pre_user_regs->orig_rax].full_name, table[pre_user_regs->orig_rax].libpath
-	cycle_syscall_params(table[pre_user_regs->orig_rax].reg_types, \
+		process, user_regs->orig_rax, table[user_regs->orig_rax].name);
+	cycle_syscall_params(process, table[user_regs->orig_rax].reg_types, \
 		(unsigned long[6]) {
-			pre_user_regs->rdi, pre_user_regs->rsi, pre_user_regs->rdx, \
-			pre_user_regs->r10, pre_user_regs->r8, pre_user_regs->r9
+			user_regs->rdi, user_regs->rsi, user_regs->rdx, \
+			user_regs->r10, user_regs->r8, user_regs->r9
 		});
-	write(STDOUT_FILENO, " = ", 3);
-	if (table[pre_user_regs->orig_rax].reg_ret_type == INT && \
-		(-4095 <= (int)post_user_regs->rax && (int)post_user_regs->rax <= -1))
-		ft_printf("-1 %s (%s)", tostring_errnum(-post_user_regs->rax - 1), ft_strerror(-post_user_regs->rax - 1));
-	else
-		format_reg_value(table[pre_user_regs->orig_rax].reg_ret_type, post_user_regs->rax, 0);
 	return (0);
 }
 
-int				print_syscall_info(pid_t process, struct user_regs_struct *pre_user_regs, \
-					struct user_regs_struct *post_user_regs)
+static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *user_regs, \
+					t_ft_strace_syscall *table)
+{
+	fflush(stdout);
+	write(STDOUT_FILENO, " = ", 3);
+	if (table[user_regs->orig_rax].reg_ret_type == INT && \
+		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
+		ft_printf("-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
+	else
+		format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax, 0);
+	write(STDOUT_FILENO, "\n", 1);
+	return (0);
+}
+
+int				print_syscall_info(pid_t process, bool regs_type, \
+					struct user_regs_struct *user_regs)
 {
 	t_ft_strace_syscall	*table;
 
 	table = g_syscall_table_64;
-	if (pre_user_regs->orig_rax < ( sizeof(g_syscall_table_64) / sizeof(t_ft_strace_syscall) ))
-		print_valid_syscall(process, pre_user_regs, post_user_regs, table);
-	else
-		handle_invalid_syscall_id(process, pre_user_regs, post_user_regs);
-	write(STDOUT_FILENO, "\n", 1);
+	if (regs_type == PRE_SYSCALL_REGS)
+	{
+		if (user_regs->orig_rax < ( sizeof(g_syscall_table_64) / sizeof(t_ft_strace_syscall) ))
+			print_valid_pre_syscall(process, user_regs, table);
+		else
+			handle_invalid_syscall_id(process, user_regs);
+	}
+	else if (regs_type == POST_SYSCALL_REGS)
+		return (print_valid_post_syscall(process, user_regs, table));
 	return (0);
 }

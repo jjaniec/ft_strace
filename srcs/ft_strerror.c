@@ -6,13 +6,14 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 19:47:02 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/03 20:09:06 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 18:01:52 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-char 		*g_errno_table[121][2] = {
+char 		*g_errno_table[122][2] = {
+	{},
 	{ "EPERM", "Operation not permitted" },
 	{ "ENOENT", "No such file or directory" },
 	{ "ESRCH", "No such process" },
