@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 19:02:54 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 21:51:25 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -342,6 +342,23 @@ static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pr
 	return (0);
 }
 
+static int		custom_write(int fd, char *str, size_t max_nbyte)
+{
+	char	*tmp;
+	char	*escaped_chars = "\n\t";
+	char	*replacements[] = {
+		"\\n",
+		"\\t"
+	};
+
+	for (size_t count = 0; count < max_nbyte && *(str + count); count++)
+		if ((tmp = ft_strchr(escaped_chars, *(str + count))))
+			write(fd, replacements[tmp - escaped_chars], \
+				ft_strlen(replacements[tmp - escaped_chars]));
+		else
+			write(fd, str + count, 1);
+}
+
 /*
 ** https://linuxgazette.net/issue81/sandeep.html
 */
@@ -349,29 +366,27 @@ static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pr
 static int		print_string(pid_t child, unsigned long reg_value)
 {
 	unsigned long	tmp;
-	unsigned int	read;
-	char			buf[STR_BUFFER_LEN];
+	unsigned long	read;
+	char			buf[STR_BUFFER_LEN + 1];
 
 	read = 0;
-	while (1)
+	buf[STR_BUFFER_LEN] = '\0';
+	while (read < STR_BUFFER_LEN)
 	{
 		errno = 0;
 		tmp = ptrace(PTRACE_PEEKDATA, child, reg_value + read);
 		if (errno)
-		{
-			printf("ptrace returned %x, %d\n", tmp, errno);
-			printf("%s", ft_strerror(errno));
 			return (1);
-		}
 		ft_memcpy(buf + read, &tmp, sizeof(tmp));
+		read += sizeof(tmp);
 		if (ft_memchr(&tmp, 0, sizeof(tmp)))
 			break ;
-		read += (unsigned int)sizeof(tmp);
 	}
-	if (read == (sizeof(buf)))
-		ft_printf("\"%*s...\"", STR_BUFFER_LEN, buf);
-	else
-		ft_printf("\"%s\"", buf);
+	write(STDOUT_FILENO, "\"", 1);
+	custom_write(STDOUT_FILENO, buf, (read < PRINTED_STR_LEN) ? (read) : (PRINTED_STR_LEN));
+	write(STDOUT_FILENO, "\"", 1);
+	if (read > PRINTED_STR_LEN)
+		write(STDOUT_FILENO, "...", 3);
 	return (0);
 }
 
@@ -411,7 +426,6 @@ static int		cycle_syscall_params(pid_t child, int syscall_reg_types[6], unsigned
 		if (format_reg_value(child, syscall_reg_types[i], pre_user_regs[i], i) == 0)
 			break ;
 	}
-	write(STDOUT_FILENO, ")", 1);
 	return (0);
 }
 
@@ -437,7 +451,7 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 					t_ft_strace_syscall *table)
 {
 	fflush(stdout);
-	write(STDOUT_FILENO, " = ", 3);
+	write(STDOUT_FILENO, ") = ", 4);
 	if (table[user_regs->orig_rax].reg_ret_type == INT && \
 		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
 		ft_printf("-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));

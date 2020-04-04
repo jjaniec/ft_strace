@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 18:50:58 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/04 21:48:06 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,6 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 			cont_process(child, &status, &post_user_regs) || \
 			print_syscall_info(child, POST_SYSCALL_REGS, &post_user_regs))
 			break ;
-		// print_syscall_info(child, &pre_user_regs, &post_user_regs);
 		opts->c--;
 	}
 	if (!opts->c)
