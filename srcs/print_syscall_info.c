@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 21:51:25 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/07 14:30:21 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "lstat", "sys_newlstat", "fs/stat.c", {STR, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "poll", "sys_poll", "fs/select.c", {PTR, UINT, INT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "lseek", "sys_lseek", "fs/read_write.c", {INT, LONG, INT, UNDEF, UNDEF, UNDEF}, LONG },
-	{ "mmap", "sys_mmap", "arch/x86/kernel/sys_x86_64.c", {PTR, SIZE_T, PROT, MAP, INT, HEX}, PTR },
-	{ "mprotect", "sys_mprotect", "mm/mprotect.c", {PTR, SIZE_T, PROT, UNDEF, UNDEF, UNDEF}, INT },
+	{ "mmap", "sys_mmap", "arch/x86/kernel/sys_x86_64.c", {PTR, SIZE_T, MAP_PROT, FLAGS, INT, HEX}, PTR },
+	{ "mprotect", "sys_mprotect", "mm/mprotect.c", {PTR, SIZE_T, MAP_PROT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "munmap", "sys_munmap", "mm/mmap.c", {PTR, SIZE_T, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "brk", "sys_brk", "mm/mmap.c", {PTR, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, PTR },
 	{ "rt_sigaction", "sys_rt_sigaction", "kernel/signal.c", {INT, PTR, PTR, UNDEF, UNDEF, UNDEF}, INT },
@@ -230,7 +230,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "epoll_create", "sys_epoll_create", "fs/eventpoll.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "epoll_ctl_old", "", "NOT IMPLEMENTED", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
 	{ "epoll_wait_old", "", "NOT IMPLEMENTED", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
-	{ "remap_file_pages", "sys_remap_file_pages", "mm/fremap.c", {PTR, SIZE_T, PROT, SIZE_T, INT, UNDEF}, INT },
+	{ "remap_file_pages", "sys_remap_file_pages", "mm/fremap.c", {PTR, SIZE_T, MAP_PROT, SIZE_T, INT, UNDEF}, INT },
 	{ "getdents64", "sys_getdents64", "fs/readdir.c", {UINT, PTR, UINT, UNDEF, UNDEF, UNDEF}, INT },
 	{ "set_tid_address", "sys_set_tid_address", "kernel/fork.c", {PTR, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, LONG },
 	{ "restart_syscall", "sys_restart_syscall", "kernel/signal.c", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
@@ -342,81 +342,9 @@ static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pr
 	return (0);
 }
 
-static int		custom_write(int fd, char *str, size_t max_nbyte)
-{
-	char	*tmp;
-	char	*escaped_chars = "\n\t";
-	char	*replacements[] = {
-		"\\n",
-		"\\t"
-	};
-
-	for (size_t count = 0; count < max_nbyte && *(str + count); count++)
-		if ((tmp = ft_strchr(escaped_chars, *(str + count))))
-			write(fd, replacements[tmp - escaped_chars], \
-				ft_strlen(replacements[tmp - escaped_chars]));
-		else
-			write(fd, str + count, 1);
-}
-
 /*
-** https://linuxgazette.net/issue81/sandeep.html
+** Cycle through syscall parameters and print it with format_reg_value()
 */
-
-static int		print_string(pid_t child, unsigned long reg_value)
-{
-	unsigned long	tmp;
-	unsigned long	read;
-	char			buf[STR_BUFFER_LEN + 1];
-
-	read = 0;
-	buf[STR_BUFFER_LEN] = '\0';
-	while (read < STR_BUFFER_LEN)
-	{
-		errno = 0;
-		tmp = ptrace(PTRACE_PEEKDATA, child, reg_value + read);
-		if (errno)
-			return (1);
-		ft_memcpy(buf + read, &tmp, sizeof(tmp));
-		read += sizeof(tmp);
-		if (ft_memchr(&tmp, 0, sizeof(tmp)))
-			break ;
-	}
-	write(STDOUT_FILENO, "\"", 1);
-	custom_write(STDOUT_FILENO, buf, (read < PRINTED_STR_LEN) ? (read) : (PRINTED_STR_LEN));
-	write(STDOUT_FILENO, "\"", 1);
-	if (read > PRINTED_STR_LEN)
-		write(STDOUT_FILENO, "...", 3);
-	return (0);
-}
-
-static int		format_reg_value(pid_t child, int type, \
-					unsigned long reg_value, unsigned int reg_index)
-{
-	int			printf_fmt_types[] = {
-		INT, SIZE_T, SSIZE_T, LONG, UINT, HEX, ULONG
-	};
-	char		*printf_fmt_types_str[] = {
-		"%d", "%zu", "%zd", "%ld", "%u", "%x", "%lu"
-	};
-	int			fmt_index;
-
-	if (type == UNDEF)
-		return (0);
-	if (reg_index != 0)
-		write(STDOUT_FILENO, ", ", 2);
-	if ((fmt_index = ft_int_index(printf_fmt_types, (sizeof(printf_fmt_types) / sizeof(int)), type)) != -1)
-		ft_printf(printf_fmt_types_str[fmt_index], reg_value);
-	else if (type == PTR)
-		reg_value ? \
-			ft_printf("%p", reg_value) : \
-			ft_printf("NULL");
-	else if (type == STR)
-		print_string(child, reg_value);
-	else
-		ft_printf("%s", "TODO");
-	return (1);
-}
 
 static int		cycle_syscall_params(pid_t child, int syscall_reg_types[6], unsigned long pre_user_regs[6])
 {
@@ -430,7 +358,7 @@ static int		cycle_syscall_params(pid_t child, int syscall_reg_types[6], unsigned
 }
 
 /*
-** https://stackoverflow.com/questions/29047592/accessing-errno-h-in-assembly-language
+** Print values contained in the registers before calling the syscall
 */
 
 static int		print_valid_pre_syscall(pid_t process, struct user_regs_struct *user_regs, \
@@ -447,6 +375,12 @@ static int		print_valid_pre_syscall(pid_t process, struct user_regs_struct *user
 	return (0);
 }
 
+/*
+** Print values contained in the registers after calling the syscall
+**
+** https://stackoverflow.com/questions/29047592/accessing-errno-h-in-assembly-language
+*/
+
 static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *user_regs, \
 					t_ft_strace_syscall *table)
 {
@@ -460,6 +394,8 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 	write(STDOUT_FILENO, "\n", 1);
 	return (0);
 }
+
+
 
 int				print_syscall_info(pid_t process, bool regs_type, \
 					struct user_regs_struct *user_regs)

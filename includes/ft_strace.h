@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 21:05:43 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/07 14:40:10 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 # include <sys/reg.h>
 # include <sys/user.h>
 # include <stdio.h>
+# include <sys/mman.h> // mmap prot
+
 
 // Buffer len used for path resolution of executables passed as arguments
 # define PATH_RES_BUFF_LEN	1024
@@ -68,7 +70,7 @@ enum e_systypes	{
 	VOID,
 	FLAGS,
 	UNDEF,
-	PROT,
+	MAP_PROT,
 	HEX,
 	ULONG,
 	MAP
@@ -93,5 +95,7 @@ int			print_syscall_info(pid_t process, bool regs_type, \
 char		*ft_strerror(int errnum);
 
 char		*tostring_errnum(int errnum);
+
+int			format_reg_value(pid_t child, int type, unsigned long reg_value, unsigned int reg_index);
 
 #endif

@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/03 20:00:21 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/07 14:31:27 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,8 @@ SRC_NAME =	main.c \
 			ft_strace.c \
 			print_syscall_info.c \
 			parse_opts.c \
-			ft_strerror.c
+			ft_strerror.c \
+			format_reg_value.c
 
 SRC_DIR = ./srcs/
 INCLUDES_DIR = ./includes/
