@@ -73,7 +73,7 @@ t_ft_strace_syscall	g_syscall_table_64[329] = {
 	{ "clone", "stub_clone", "kernel/fork.c", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 	{ "fork", "stub_fork", "kernel/fork.c", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 	{ "vfork", "stub_vfork", "kernel/fork.c", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
-	{ "execve", "stub_execve", "fs/exec.c", {STR, PTR, PTR, UNDEF, UNDEF, UNDEF}, INT },
+	{ "execve", "stub_execve", "fs/exec.c", {STR, STR_TAB, STR_TAB, UNDEF, UNDEF, UNDEF}, INT },
 	{ "exit", "sys_exit", "kernel/exit.c", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
 	{ "wait4", "sys_wait4", "kernel/exit.c", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 	{ "kill", "sys_kill", "kernel/signal.c", {INT, INT, UNDEF, UNDEF, UNDEF, UNDEF}, INT },

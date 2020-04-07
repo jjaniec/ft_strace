@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/07 16:53:36 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/07 19:41:20 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,7 @@
 // Number of chars to print before "..." if the string is longer
 # define PRINTED_STR_LEN	32
 
-// Maximum number of chars to read from strings in text section, doesn't need to be high
-// if PRINTED_STR_LEN is low
-# define STR_BUFFER_LEN		64
+# define STR_BUFFER_LEN		1024
 
 # define PRE_SYSCALL_REGS	true
 # define POST_SYSCALL_REGS	false
@@ -93,6 +91,7 @@ typedef struct s_ft_strace_flag_list {
 enum e_systypes	{
 	INT,
 	STR,
+	STR_TAB,
 	SIZE_T,
 	SSIZE_T,
 	PTR,
