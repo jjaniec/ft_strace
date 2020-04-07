@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/04 21:48:06 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/07 18:05:52 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ static int	handle_execve_err(void)
 
 static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_environ)
 {
-	raise(SIGSTOP);
+	// raise(SIGSTOP);
+	kill(getpid(), SIGSTOP);
 	// pause();
 	if (execve(exec_path, exec_args, exec_environ) == -1)
 		handle_execve_err();
@@ -58,6 +59,25 @@ static int	cont_process(pid_t process, int *status, struct user_regs_struct *use
 	if (WIFEXITED(*status))
 		return (1);
 	return (2);
+}
+
+/*
+** Apply sigmask to block
+*/
+
+static int			init_sigs(void)
+{
+	sigset_t	sigmask;
+
+	sigemptyset(&sigmask);
+	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigaddset(&sigmask, SIGINT);
+	sigaddset(&sigmask, SIGQUIT);
+	sigaddset(&sigmask, SIGTERM);
+	sigaddset(&sigmask, SIGHUP);
+	sigaddset(&sigmask, SIGPIPE);
+	sigprocmask(SIG_BLOCK, &sigmask, NULL);
+	return (0);
 }
 
 /*
@@ -93,8 +113,10 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 	int 						status;
 
 	ptrace(PTRACE_SEIZE, child, 0, 0);
+	init_sigs();
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
-	ptrace(PTRACE_INTERRUPT, child, 0, 0);
+	// ptrace(PTRACE_INTERRUPT, child, 0, 0);
+	waitpid(child, &status, 0);
 	if (!opts->c)
 	{
 		ptrace(PTRACE_SYSCALL, child, 0, 0);
@@ -120,25 +142,6 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 }
 
 /*
-** Apply sigmask to block
-*/
-
-static int			init_sigs(void)
-{
-	sigset_t	sigmask;
-
-	sigemptyset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
-	sigaddset(&sigmask, SIGINT);
-	sigaddset(&sigmask, SIGQUIT);
-	sigaddset(&sigmask, SIGTERM);
-	sigaddset(&sigmask, SIGHUP);
-	sigaddset(&sigmask, SIGPIPE);
-	sigprocmask(SIG_BLOCK, &sigmask, NULL);
-	return (0);
-}
-
-/*
 ** Fork, start the program passed as arguments in the child process
 ** and monitor the child in the main process
 */
@@ -147,7 +150,6 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 {
 	pid_t	child;
 
-	init_sigs();
 	if ((child = fork()) == -1)
 	{
 		write(STDERR_FILENO, ERR_PREFIX "Fork failed!\n", ft_strlen(ERR_PREFIX) + 13);
