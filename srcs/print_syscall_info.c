@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/07 14:30:21 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/07 15:59:34 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,12 +346,19 @@ static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pr
 ** Cycle through syscall parameters and print it with format_reg_value()
 */
 
-static int		cycle_syscall_params(pid_t child, int syscall_reg_types[6], unsigned long pre_user_regs[6])
+static int		cycle_syscall_params(pid_t child, unsigned long orig_rax, \
+					int syscall_reg_types[6], unsigned long pre_user_regs[6])
 {
 	write(STDOUT_FILENO, "(", 1);
-	for (unsigned int i = 0; i < 6; i++)
+	for (unsigned int i = 0; i < 6 && syscall_reg_types[i] != UNDEF; i++)
 	{
-		if (format_reg_value(child, syscall_reg_types[i], pre_user_regs[i], i) == 0)
+		if (i)
+			write(STDOUT_FILENO, ", ", 2);
+		if (ft_int_index((int []) {
+				FLAGS, MAP_PROT
+			}, 2, syscall_reg_types[i]) != -1)
+			format_syscall_flags(child, orig_rax, syscall_reg_types[i], pre_user_regs[i]);
+		else if (format_reg_value(child, syscall_reg_types[i], pre_user_regs[i]) == 0)
 			break ;
 	}
 	return (0);
@@ -367,7 +374,8 @@ static int		print_valid_pre_syscall(pid_t process, struct user_regs_struct *user
 	fflush(stdout);
 	ft_printf(INFO_PREFIX "[%d] => (%3ld) %s", \
 		process, user_regs->orig_rax, table[user_regs->orig_rax].name);
-	cycle_syscall_params(process, table[user_regs->orig_rax].reg_types, \
+	cycle_syscall_params(process, user_regs->orig_rax, \
+		table[user_regs->orig_rax].reg_types, \
 		(unsigned long[6]) {
 			user_regs->rdi, user_regs->rsi, user_regs->rdx, \
 			user_regs->r10, user_regs->r8, user_regs->r9
@@ -390,7 +398,7 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
 		ft_printf("-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
 	else
-		format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax, 0);
+		format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax);
 	write(STDOUT_FILENO, "\n", 1);
 	return (0);
 }
