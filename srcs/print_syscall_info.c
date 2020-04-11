@@ -6,15 +6,13 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 19:14:21 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 20:09:20 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-t_ft_strace_syscall	g_syscall_table_64[329] = {
-	#include "syscall_table_64.h"
-};
+extern t_ft_strace_syscall	g_syscall_table_64[329];
 
 /*
 ** Format & print info on user registers
@@ -92,13 +90,9 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 
 
 int				print_syscall_info(pid_t process, bool regs_type, \
-					struct user_regs_struct *user_regs)
+					struct user_regs_struct *user_regs, \
+					t_ft_strace_syscall *table)
 {
-	t_ft_strace_syscall				*table;
-	// t_ft_strace_syscall_exec_info	*exec_infos;
-
-	table = g_syscall_table_64;
-	// exec_infos = malloc(sizeof(t_ft_strace_syscall_exec_info) * (sizeof(table) / sizeof(table[0]));
 	if (regs_type == PRE_SYSCALL_REGS)
 	{
 		if (user_regs->orig_rax < ( sizeof(g_syscall_table_64) / sizeof(t_ft_strace_syscall) ))

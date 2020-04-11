@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/11 15:27:00 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/11 20:06:17 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,14 +15,15 @@ NAME = ft_strace
 UNAME_S := $(shell uname -s)
 
 SRC_NAME =	main.c \
+			show_calls_summary.c \
 			resolve_path.c \
-			ft_strace.c \
 			print_syscall_info.c \
 			parse_opts.c \
+			handle_wait_status.c \
 			ft_strerror.c \
-			format_reg_value.c \
+			ft_strace.c \
 			format_syscall_flags.c \
-			handle_wait_status.c
+			format_reg_value.c
 
 SRC_DIR = ./srcs/
 INCLUDES_DIR = ./includes/

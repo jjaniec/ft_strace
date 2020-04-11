@@ -6,11 +6,15 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 16:33:18 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 20:15:20 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
+
+t_ft_strace_syscall	g_syscall_table_64[329] = {
+	#include "syscall_table_64.h"
+};
 
 /*
 ** Handle execve errors with errno codes
@@ -81,6 +85,24 @@ static int			init_sigs(void)
 }
 
 /*
+** Update call & error count of last syscall
+*/
+
+static int		update_syscall_exec_infos(t_ft_strace_syscall *table, \
+					t_ft_strace_syscall_exec_info *exec_infos, \
+					struct user_regs_struct *post_user_regs)
+{
+	exec_infos[post_user_regs->orig_rax].calls++;
+	if (table[post_user_regs->orig_rax].reg_ret_type == INT && \
+		(-4095 <= (int)post_user_regs->rax && (int)post_user_regs->rax <= -1))
+	{
+		exec_infos[post_user_regs->orig_rax].errors++;
+	}
+	return (0);
+}
+
+
+/*
 ** PTRACE_SEIZE:
 ** Since Linux 3.4, PTRACE_SEIZE can be used instead of PTRACE_ATTACH.
 ** PTRACE_SEIZE does not stop the attached process.  If you need to stop
@@ -108,36 +130,50 @@ static int			init_sigs(void)
 
 static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 {
-	struct user_regs_struct		pre_user_regs;
-	struct user_regs_struct		post_user_regs;
-	int 						status;
+	struct user_regs_struct			pre_user_regs;
+	struct user_regs_struct			post_user_regs;
+	int 							status;
+	t_ft_strace_syscall				*table;
+	t_ft_strace_syscall_exec_info	*exec_infos;
+	size_t							table_size;
 
+	table = g_syscall_table_64;
+	table_size = sizeof(t_ft_strace_syscall_exec_info) * (sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]));
+	if (opts->c)
+	{
+		exec_infos = malloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
+		ft_memset(exec_infos, 0, sizeof(t_ft_strace_syscall_exec_info) * table_size);
+	}
 	ptrace(PTRACE_SEIZE, child, 0, 0);
 	// init_sigs();
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
-	// ptrace(PTRACE_INTERRUPT, child, 0, 0);
 	waitpid(child, &status, 0);
-	// if (!opts->c)
+	// if (!opts->d)
 	// {
 	// 	ptrace(PTRACE_SYSCALL, child, 0, 0);
 	// 	waitpid(child, &status, 0);
 	// }
-	while (opts->c != 0)
+	while (opts->d != 0)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
-			print_syscall_info(child, PRE_SYSCALL_REGS, &pre_user_regs) || \
+			print_syscall_info(child, PRE_SYSCALL_REGS, &pre_user_regs, table) || \
 			cont_process(child, &status, &post_user_regs) || \
-			print_syscall_info(child, POST_SYSCALL_REGS, &post_user_regs))
+			print_syscall_info(child, POST_SYSCALL_REGS, &post_user_regs, table))
 			break ;
-		// opts->c--;
+		if (opts->c)
+			update_syscall_exec_infos(table, exec_infos, &post_user_regs);
+		// opts->d--;
 	}
-	// if (!opts->c)
+	// if (!opts->d)
 	// {
 	// 	ptrace(PTRACE_CONT, child, 0, 0);
 	// 	waitpid(child, &status, 0);
 	// }
-	// if (WIFEXITED(status))
-		// ft_printf(INFO_PREFIX "[%d] exited with %d\n", child, status);
+	if (opts->c)
+	{
+		show_calls_summary(table, 329, exec_infos);
+		free(exec_infos);
+	}
 	return (1);
 }
 

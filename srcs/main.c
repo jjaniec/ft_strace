@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 21:48:46 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 19:29:01 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ int		main(int ac, char **av, char **environ)
 
 	(void)ac;
 	(void)av;
-	opts.c = -1;
+	opts.c = false;
+	opts.d = -1;
 	cmd_args = parse_opts(&opts, ac, av);
 	if (!(ac > 1 && cmd_args && *cmd_args))
 	{

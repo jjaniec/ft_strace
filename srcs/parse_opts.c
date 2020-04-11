@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/29 22:02:11 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 15:33:09 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 19:27:55 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,13 @@ char			**parse_opts(t_ft_strace_opts *opts, int ac, char **av)
 	ptr = av + 1;
 	while (ptr && *ptr && **ptr == '-')
 	{
-		if ((*ptr)[1] == 'c')
+		if (ft_strchr(*ptr + 1, 'c'))
+			opts->c = true;
+		else if (ft_strchr(*ptr + 1, 'd')) /* (*ptr)[1] == 'd') */
 		{
 			if (!(ptr[1] && ft_str_is_positive_numeric(ptr[1])))
 				return (NULL);
-			opts->c = ft_atoi(ptr[1]);
+			opts->d = ft_atoi(ptr[1]);
 			ptr++;
 		}
 		else if ((*ptr)[1] == '-' && (*ptr)[2] == '\0')
