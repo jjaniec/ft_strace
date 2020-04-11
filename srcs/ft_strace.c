@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 15:31:26 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 16:33:18 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,7 @@ static int	handle_execve_err(void)
 
 static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_environ)
 {
-	// raise(SIGSTOP);
 	kill(getpid(), SIGSTOP);
-	// pause();
 	if (execve(exec_path, exec_args, exec_environ) == -1)
 		handle_execve_err();
 }
@@ -115,7 +113,7 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 	int 						status;
 
 	ptrace(PTRACE_SEIZE, child, 0, 0);
-	init_sigs();
+	// init_sigs();
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
 	// ptrace(PTRACE_INTERRUPT, child, 0, 0);
 	waitpid(child, &status, 0);
