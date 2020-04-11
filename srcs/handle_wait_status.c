@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 17:47:04 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 18:45:08 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,11 @@ char		*sys_signame[] = {
 #endif
 };
 
+static char		*str_signo(int sig)
+{
+	return (sys_signame[sig]);
+}
+
 /*
 ** https://sites.uclouvain.be/SystInfo/usr/include/bits/siginfo.h.html
 */
@@ -142,9 +147,50 @@ static char 	*str_sicode(int si_signo, int si_code)
 	return ("UNKNOWN");
 }
 
-static char		*str_signo(int sig)
+/*
+** siginfo_t struct refrence: https://docs.huihoo.com/doxygen/linux/kernel/3.7/structsiginfo.html
+*/
+
+static int	handle_stopped_status(pid_t child)
 {
-	return (sys_signame[sig]);
+	siginfo_t		status_siginfo;
+
+	// printf("++++ Stopped code: \n");
+	ptrace(PTRACE_GETSIGINFO, child, NULL, &status_siginfo);
+	if (status_siginfo.si_signo == SIGTRAP)
+		return (0);
+	if (status_siginfo.si_signo == SIGCHLD)
+	{
+		dprintf(STDOUT_FILENO, \
+			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d, si_status=%d, si_utime=%ld, si_stime=%ld} ---\n", \
+			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
+			status_siginfo.si_pid, status_siginfo.si_uid, status_siginfo.si_status, \
+			status_siginfo.si_utime, status_siginfo.si_stime);
+	}
+	else if (status_siginfo.si_signo == SIGSEGV)
+	{
+		dprintf(STDOUT_FILENO, \
+			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
+			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
+	}
+	else if (status_siginfo.si_signo == SIGINT || \
+		status_siginfo.si_signo == SIGTSTP || \
+		status_siginfo.si_signo == SIGCONT)
+	{
+		dprintf(STDOUT_FILENO, "--- SIG%s {si_signo=SIG%s, si_code=%s} ---\n", \
+			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+			str_sicode(status_siginfo.si_signo, status_siginfo.si_code));
+	}
+	else
+	{
+		dprintf(STDOUT_FILENO, "--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d} ---\n", \
+			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
+			status_siginfo.si_pid, status_siginfo.si_uid);
+	}
+	return (status_siginfo.si_signo);
 }
 
 /*
@@ -162,7 +208,6 @@ int		handle_wait_status(pid_t child, int status)
 {
 	int				r;
 	char			*sig_fmt;
-	siginfo_t		status_siginfo;
 
 	(void)child;
 	r = 0;
@@ -178,28 +223,8 @@ int		handle_wait_status(pid_t child, int status)
 		dprintf(STDOUT_FILENO, "+++ Killed by SIG%s +++\n", sig_fmt);
 		r = 2;
 	}
-	if (WIFSTOPPED(status) /* && status == SIGTRAP */)
-	{
-		// printf("++++ Stopped code: \n");
-		ptrace(PTRACE_GETSIGINFO, child, NULL, &status_siginfo);
-		if (status_siginfo.si_signo == SIGCHLD)
-		{
-			dprintf(STDOUT_FILENO, \
-				"--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d, si_status=%d, si_utime=%ld, si_stime=%ld} ---\n", \
-				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
-				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
-				status_siginfo.si_pid, status_siginfo.si_uid, status_siginfo.si_status, \
-				status_siginfo.si_utime, status_siginfo.si_stime);
-		}
-		if (status_siginfo.si_signo == SIGSEGV)
-		{
-			dprintf(STDOUT_FILENO, \
-				"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
-				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
-				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
-			r = 3;
-		}
-	}
-	fflush(stdout);
+	if (WIFSTOPPED(status))
+		handle_stopped_status(child);
+	// fflush(stdout);
 	return (r);
 }
