@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/07 19:41:20 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 15:54:53 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,10 @@
 # include <unistd.h>
 # include <sys/reg.h>
 # include <sys/user.h>
-# include <stdio.h>
+# include <stdio.h> //printf
 # include <sys/mman.h> // mmap prot
-
+# include <string.h> //strsignal
+# include <signal.h> // signal definitions
 
 // Buffer len used for path resolution of executables passed as arguments
 # define PATH_RES_BUFF_LEN	1024
@@ -131,5 +132,7 @@ int			format_reg_value(pid_t child, int type, unsigned long reg_value);
 
 int			format_syscall_flags(pid_t child, unsigned long orig_rax, \
 				int type, unsigned long reg_value);
+
+int			handle_wait_status(pid_t child, int status);
 
 #endif

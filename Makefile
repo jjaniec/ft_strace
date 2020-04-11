@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/07 15:26:20 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/11 15:27:00 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ SRC_NAME =	main.c \
 			parse_opts.c \
 			ft_strerror.c \
 			format_reg_value.c \
-			format_syscall_flags.c
+			format_syscall_flags.c \
+			handle_wait_status.c
 
 SRC_DIR = ./srcs/
 INCLUDES_DIR = ./includes/

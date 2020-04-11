@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/29 22:02:11 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/29 22:02:12 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 15:33:09 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ char			**parse_opts(t_ft_strace_opts *opts, int ac, char **av)
 {
 	char	**ptr;
 
+	(void)ac;
 	ptr = av + 1;
 	while (ptr && *ptr && **ptr == '-')
 	{

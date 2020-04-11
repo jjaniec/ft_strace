@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 15:24:55 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/07 19:01:01 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 15:33:30 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ static int	print_fmt_flags(pid_t child, unsigned long reg_value, \
 {
 	bool	print_pipe;
 
+	(void)child;
 	print_pipe = false;
 	for (unsigned int i = 0; i < flag_list->size; i++)
 	{

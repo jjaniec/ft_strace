@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/07 18:05:52 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/11 15:31:26 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,16 @@ static int	cont_process(pid_t process, int *status, struct user_regs_struct *use
 {
 	ptrace(PTRACE_SYSCALL, process, 0, 0);
 	waitpid(process, status, 0);
+	if (handle_wait_status(process, *status))
+		return (2);
 	if (WSTOPSIG(*status) & (SIGTRAP | 0x80))
 	{
 		ptrace(PTRACE_GETREGS, process, 0, user_regs);
 		return (0);
 	}
-	if (WIFEXITED(*status))
-		return (1);
-	return (2);
+	// if (WIFEXITED(*status))
+	// 	return (1);
+	return (1);
 }
 
 /*
@@ -117,11 +119,11 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
 	// ptrace(PTRACE_INTERRUPT, child, 0, 0);
 	waitpid(child, &status, 0);
-	if (!opts->c)
-	{
-		ptrace(PTRACE_SYSCALL, child, 0, 0);
-		waitpid(child, &status, 0);
-	}
+	// if (!opts->c)
+	// {
+	// 	ptrace(PTRACE_SYSCALL, child, 0, 0);
+	// 	waitpid(child, &status, 0);
+	// }
 	while (opts->c != 0)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
@@ -129,15 +131,15 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 			cont_process(child, &status, &post_user_regs) || \
 			print_syscall_info(child, POST_SYSCALL_REGS, &post_user_regs))
 			break ;
-		opts->c--;
+		// opts->c--;
 	}
-	if (!opts->c)
-	{
-		ptrace(PTRACE_CONT, child, 0, 0);
-		waitpid(child, &status, 0);
-	}
-	if (WIFEXITED(status))
-		ft_printf(INFO_PREFIX "[%d] exited with %d\n", child, status);
+	// if (!opts->c)
+	// {
+	// 	ptrace(PTRACE_CONT, child, 0, 0);
+	// 	waitpid(child, &status, 0);
+	// }
+	// if (WIFEXITED(status))
+		// ft_printf(INFO_PREFIX "[%d] exited with %d\n", child, status);
 	return (1);
 }
 
