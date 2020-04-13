@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 20:15:20 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/13 17:41:34 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ static int		update_syscall_exec_infos(t_ft_strace_syscall *table, \
 ** Restart the stopped tracee process.
 */
 
-static int	handle_child(t_ft_strace_opts *opts, pid_t child)
+static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid_t child)
 {
 	struct user_regs_struct			pre_user_regs;
 	struct user_regs_struct			post_user_regs;
@@ -137,8 +137,16 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 	t_ft_strace_syscall_exec_info	*exec_infos;
 	size_t							table_size;
 
-	table = g_syscall_table_64;
-	table_size = sizeof(t_ft_strace_syscall_exec_info) * (sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]));
+	// if (bin_elf_class == ELFCLASS32)
+	// {
+	// 	table = g_syscall_table_32;
+	// 	table_size = sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]);
+	// }
+	/*else */if (bin_elf_class == ELFCLASS64)
+	{
+		table = g_syscall_table_64;
+		table_size = sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]);
+	}
 	if (opts->c)
 	{
 		exec_infos = malloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
@@ -169,9 +177,10 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 	// 	ptrace(PTRACE_CONT, child, 0, 0);
 	// 	waitpid(child, &status, 0);
 	// }
+	printf("Table size: %zu\n", table_size);
 	if (opts->c)
 	{
-		show_calls_summary(table, 329, exec_infos);
+		show_calls_summary(table, table_size, exec_infos);
 		free(exec_infos);
 	}
 	return (1);
@@ -184,8 +193,10 @@ static int	handle_child(t_ft_strace_opts *opts, pid_t child)
 
 int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char **exec_environ)
 {
-	pid_t	child;
+	pid_t			child;
+	unsigned char	bin_elf_class;
 
+	bin_elf_class = get_binary_architecture(exec_path);
 	if ((child = fork()) == -1)
 	{
 		write(STDERR_FILENO, ERR_PREFIX "Fork failed!\n", ft_strlen(ERR_PREFIX) + 13);
@@ -194,7 +205,7 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 	if (child)
 	{
 		ft_printf(OK_PREFIX "Child pid: %d\n", child);
-		return (handle_child(opts, child));
+		return (handle_child(bin_elf_class, opts, child));
 	}
 	child_process_tasks(exec_path, exec_args, exec_environ);
 	return (0);

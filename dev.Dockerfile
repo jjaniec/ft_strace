@@ -10,7 +10,9 @@ RUN			apt-get update -yqq && \
 					gcc \
 					build-essential \
 					psmisc \
-					strace && \
+					strace \
+					gcc-multilib \
+					&& \
 			rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["bash"]

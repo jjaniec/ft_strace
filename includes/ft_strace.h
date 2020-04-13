@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 20:09:28 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/13 17:27:28 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 # include <sys/mman.h> // mmap prot
 # include <string.h> //strsignal
 # include <signal.h> // signal definitions
+# include <elf.h>
+
 
 // Buffer len used for path resolution of executables passed as arguments
 # define PATH_RES_BUFF_LEN	1024
@@ -145,5 +147,7 @@ int			handle_wait_status(pid_t child, int status);
 
 int			show_calls_summary(t_ft_strace_syscall *table, size_t table_size, \
 				t_ft_strace_syscall_exec_info *exec_infos);
+
+unsigned char	get_binary_architecture(const char *abspath);
 
 #endif
