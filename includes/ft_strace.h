@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/13 17:27:28 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/13 18:42:46 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,8 @@ typedef struct	s_ft_strace_opts {
 
 typedef struct	s_ft_strace_syscall {
 	char		*name;
-	char		*full_name;
-	char		*libpath;
+	// char		*full_name;
+	// char		*libpath;
 	int			reg_types[6];
 	int			reg_ret_type;
 }				t_ft_strace_syscall;
@@ -128,9 +128,10 @@ char		*resolve_path(char *cmd, char **environ);
 
 char		**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
 
-int			print_syscall_info(pid_t process, bool regs_type, \
-				struct user_regs_struct *user_regs, \
-				t_ft_strace_syscall *table);
+int				print_syscall_info(pid_t process, bool regs_type, \
+					unsigned char bin_elf_class, \
+					struct user_regs_struct *user_regs, \
+					t_ft_strace_syscall *table);
 
 // ft_strerror.c
 
@@ -140,8 +141,9 @@ char		*tostring_errnum(int errnum);
 
 int			format_reg_value(pid_t child, int type, unsigned long reg_value);
 
-int			format_syscall_flags(pid_t child, unsigned long orig_rax, \
-				int type, unsigned long reg_value);
+int			format_syscall_flags(pid_t child, unsigned char bin_elf_class, \
+				unsigned long orig_rax, int type, \
+				unsigned long reg_value);
 
 int			handle_wait_status(pid_t child, int status);
 

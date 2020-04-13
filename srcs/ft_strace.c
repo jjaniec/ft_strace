@@ -6,14 +6,18 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/13 17:41:34 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/13 18:07:06 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-t_ft_strace_syscall	g_syscall_table_64[329] = {
+t_ft_strace_syscall	g_syscall_table_64[] = {
 	#include "syscall_table_64.h"
+};
+
+t_ft_strace_syscall	g_syscall_table_32[] = {
+	#include "syscall_table_32.h"
 };
 
 /*
@@ -137,23 +141,26 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	t_ft_strace_syscall_exec_info	*exec_infos;
 	size_t							table_size;
 
-	// if (bin_elf_class == ELFCLASS32)
-	// {
-	// 	table = g_syscall_table_32;
-	// 	table_size = sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]);
-	// }
-	/*else */if (bin_elf_class == ELFCLASS64)
+	if (bin_elf_class == ELFCLASS32)
+	{
+		table = g_syscall_table_32;
+		table_size = sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]);
+	}
+	else if (bin_elf_class == ELFCLASS64)
 	{
 		table = g_syscall_table_64;
 		table_size = sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]);
 	}
+	else
+		exit(1);
+	printf("Table size: %zu\n", table_size);
 	if (opts->c)
 	{
-		exec_infos = malloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
+		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
 		ft_memset(exec_infos, 0, sizeof(t_ft_strace_syscall_exec_info) * table_size);
 	}
 	ptrace(PTRACE_SEIZE, child, 0, 0);
-	// init_sigs();
+	init_sigs();
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
 	waitpid(child, &status, 0);
 	// if (!opts->d)
@@ -164,9 +171,9 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	while (opts->d != 0)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
-			print_syscall_info(child, PRE_SYSCALL_REGS, &pre_user_regs, table) || \
+			print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, &pre_user_regs, table) || \
 			cont_process(child, &status, &post_user_regs) || \
-			print_syscall_info(child, POST_SYSCALL_REGS, &post_user_regs, table))
+			print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, &post_user_regs, table))
 			break ;
 		if (opts->c)
 			update_syscall_exec_infos(table, exec_infos, &post_user_regs);
@@ -177,7 +184,6 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	// 	ptrace(PTRACE_CONT, child, 0, 0);
 	// 	waitpid(child, &status, 0);
 	// }
-	printf("Table size: %zu\n", table_size);
 	if (opts->c)
 	{
 		show_calls_summary(table, table_size, exec_infos);
