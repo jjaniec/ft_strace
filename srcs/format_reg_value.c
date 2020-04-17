@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 14:56:11 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 16:46:54 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,10 +158,10 @@ char			*format_reg_value(pid_t child, int type, \
 					unsigned long reg_value)
 {
 	int			printf_fmt_types[] = {
-		INT, SIZE_T, SSIZE_T, LONG, UINT, HEX, ULONG
+		INT, SIZE_T, SSIZE_T, LONG, UINT, ULONG
 	};
 	char		*printf_fmt_types_str[] = {
-		"%d", "%zu", "%zd", "%ld", "%u", "%x", "%lu"
+		"%d", "%zu", "%zd", "%ld", "%u", "%lu"
 	};
 	int			fmt_index;
 	char		*ret;
@@ -175,6 +175,10 @@ char			*format_reg_value(pid_t child, int type, \
 		reg_value ? \
 			asprintf(&ret, "%p", reg_value) : \
 			asprintf(&ret, "NULL");
+	else if (type == HEX)
+		reg_value ? \
+			asprintf(&ret, "%p", reg_value) : \
+			asprintf(&ret, "0", reg_value);
 	else if (type == STR)
 		ret = get_fmt_string(child, reg_value);
 	else if (type == STR_TAB)

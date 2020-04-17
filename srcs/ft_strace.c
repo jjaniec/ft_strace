@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 12:13:00 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 20:26:18 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,17 @@ t_ft_strace_syscall	g_syscall_table_32[] = {
 	#include "syscall_table_32.h"
 };
 
+t_ft_strace_opts	*g_ft_strace_opts;
+
 /*
 ** Handle execve errors with errno codes
 */
 
 static int	handle_execve_err(void)
 {
+	// perror("execve");
 	dprintf(ERR_FD, ERR_PREFIX "%s\n", ft_strerror(errno));
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 /*
@@ -53,38 +56,75 @@ static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_e
 ** the signal number of the signal that caused the child process to stop.
 */
 
-static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
-{
-	ptrace(PTRACE_SYSCALL, process, 0, 0);
-	waitpid(process, status, 0);
-	if (handle_wait_status(process, *status))
-		return (2);
-	if (WSTOPSIG(*status) & (SIGTRAP | 0x80))
-	{
-		ptrace(PTRACE_GETREGS, process, 0, user_regs);
-		return (0);
-	}
-	// if (WIFEXITED(*status))
-	// 	return (1);
-	return (1);
-}
-
-/*
-** Apply sigmask to block
-*/
-
-static int			init_sigs(void)
+static int		allow_sigs(void)
 {
 	sigset_t	sigmask;
 
-	sigemptyset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
-	sigaddset(&sigmask, SIGINT);
-	sigaddset(&sigmask, SIGQUIT);
-	sigaddset(&sigmask, SIGTERM);
-	sigaddset(&sigmask, SIGHUP);
-	sigaddset(&sigmask, SIGPIPE);
-	sigprocmask(SIG_BLOCK, &sigmask, NULL);
+	if (sigemptyset(&sigmask) < 0)
+	{
+		perror("sigemptyset");
+		exit(EXIT_FAILURE);
+	}
+	if (sigprocmask(SIG_SETMASK, &sigmask, NULL) < 0)
+	{
+		perror("sigprocmask");
+		exit(EXIT_FAILURE);
+	}
+	return (0);
+}
+
+static int		block_sigs(void)
+{
+	sigset_t	sigmask;
+
+	if (sigemptyset(&sigmask) < 0)
+	{
+		perror("sigemptyset");
+		exit(EXIT_FAILURE);
+	}
+	if (sigaddset(&sigmask, SIGINT) < 0 || \
+		sigaddset(&sigmask, SIGQUIT) < 0 || \
+		sigaddset(&sigmask, SIGTERM) < 0 || \
+		sigaddset(&sigmask, SIGHUP) < 0 || \
+		sigaddset(&sigmask, SIGPIPE) < 0)
+	{
+		perror("sigaddset");
+		exit(EXIT_FAILURE);
+	}
+	if (sigprocmask(SIG_BLOCK, &sigmask, NULL) < 0)
+	{
+		perror("sigprocmask");
+		exit(EXIT_FAILURE);
+	}
+	return (0);
+}
+
+static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
+{
+	pid_t	waited;
+
+	while (1)
+	{
+		if (ptrace(PTRACE_SYSCALL, process, 0, 0) < 0)
+		{
+			perror("ptrace");
+			exit(EXIT_FAILURE);
+		}
+		allow_sigs();
+		if (waitpid(process, status, 0) < 0)
+		{
+			perror("waitpid");
+			exit(EXIT_FAILURE);
+		}
+		block_sigs();
+		if (handle_wait_status(process, *status) == 0)
+			break ;
+	}
+	if (ptrace(PTRACE_GETREGS, process, 0, user_regs) < 0)
+	{
+		perror("ptrace");
+		exit(EXIT_FAILURE);
+	}
 	return (0);
 }
 
@@ -132,6 +172,24 @@ static int		update_syscall_exec_infos(t_ft_strace_syscall *table, \
 ** Restart the stopped tracee process.
 */
 
+static int	init_ptrace(pid_t child, int *status)
+{
+	if (ptrace(PTRACE_SEIZE, child, NULL, 0) < 0)
+	{
+		dprintf(ERR_FD, "PTRACE_SEIZE");
+		perror("ptrace");
+		exit(EXIT_FAILURE);
+	}
+	allow_sigs();
+	if (waitpid(child, status, 0) < 0)
+	{
+		perror("waitpid");
+		exit(EXIT_FAILURE);
+	}
+	block_sigs();
+	ptrace(PTRACE_SETOPTIONS, child, NULL, PTRACE_O_TRACESYSGOOD);
+}
+
 static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid_t child)
 {
 	struct user_regs_struct			pre_user_regs;
@@ -140,6 +198,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	t_ft_strace_syscall				*table;
 	t_ft_strace_syscall_exec_info	*exec_infos;
 	size_t							table_size;
+
 
 	if (bin_elf_class == ELFCLASS32)
 	{
@@ -152,22 +211,16 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 		table_size = sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]);
 	}
 	else
-		exit(1);
+		exit(EXIT_FAILURE);
+	// printf("%d ELF Class: %x - 32: %x - 64: %x\n", child, bin_elf_class, ELFCLASS32, ELFCLASS64);
+	init_ptrace(child, &status);
 	if (opts->c)
 	{
 		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
 		ft_memset(exec_infos, 0, sizeof(t_ft_strace_syscall_exec_info) * table_size);
 	}
-	ptrace(PTRACE_SEIZE, child, 0, 0);
-	init_sigs();
-	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
-	waitpid(child, &status, 0);
-	// if (!opts->d)
-	// {
-	// 	ptrace(PTRACE_SYSCALL, child, 0, 0);
-	// 	waitpid(child, &status, 0);
-	// }
-	while (opts->d != 0)
+	dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
+	while (1 || opts->d != 0)
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
 			print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, &pre_user_regs, table) || \
@@ -176,13 +229,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 			break ;
 		if (opts->c)
 			update_syscall_exec_infos(table, exec_infos, &post_user_regs);
-		// opts->d--;
 	}
-	// if (!opts->d)
-	// {
-	// 	ptrace(PTRACE_CONT, child, 0, 0);
-	// 	waitpid(child, &status, 0);
-	// }
 	if (opts->c)
 	{
 		show_calls_summary(table, table_size, exec_infos);
@@ -202,6 +249,7 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 	unsigned char	bin_elf_class;
 
 	bin_elf_class = get_binary_architecture(exec_path);
+	g_ft_strace_opts = opts;
 	if ((child = fork()) == -1)
 	{
 		write(STDERR_FILENO, ERR_PREFIX "Fork failed!\n", ft_strlen(ERR_PREFIX) + 13);
@@ -209,7 +257,6 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 	}
 	if (child)
 	{
-		dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
 		return (handle_child(bin_elf_class, opts, child));
 	}
 	child_process_tasks(exec_path, exec_args, exec_environ);

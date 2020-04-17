@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 11:59:29 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 20:15:31 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ static int	handle_stopped_status(pid_t child)
 			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
+		exit(status_siginfo.si_signo);
 	}
 	else if (status_siginfo.si_signo == SIGINT || \
 		status_siginfo.si_signo == SIGTSTP || \
@@ -113,6 +114,7 @@ static int	handle_stopped_status(pid_t child)
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
 			status_siginfo.si_pid, status_siginfo.si_uid);
+		exit(status_siginfo.si_signo);
 	}
 	return (status_siginfo.si_signo);
 }
@@ -126,29 +128,34 @@ static int	handle_stopped_status(pid_t child)
 ** Pour le tra¸ceur, l’arrˆet semble ˆetre dˆu `a un SIGTRAP.
 ** L’option PTRACE_GETSIGINFO permet d’en connaˆıtre plus sur la
 ** raison de la notification
+**
+** https://stackoverflow.com/questions/5294870/exit-status-code-4479
 */
 
 int		handle_wait_status(pid_t child, int status)
 {
-	int				r;
 	char			*sig_fmt;
 
 	(void)child;
-	r = 0;
-	// printf("SIG status %d\n", status);
 	if (WIFEXITED(status))
 	{
-		dprintf(INFO_FD, "+++ Exited with %d +++\n", WEXITSTATUS(status));
-		r = 1;
+		dprintf(INFO_FD, "+++ exited with %d +++\n", WEXITSTATUS(status));
+		fflush(stdout);
+		exit(1);
 	}
-	else if (WIFSIGNALED(status))
+	if (WIFSIGNALED(status))
 	{
 		sig_fmt = str_signo(status);
 		dprintf(INFO_FD, "+++ Killed by SIG%s +++\n", sig_fmt);
-		r = 2;
+		fflush(stdout);
+		exit(2);
 	}
 	if (WIFSTOPPED(status))
+	{
+		if (WSTOPSIG(status) == (SIGTRAP | 0x80))
+			return (0);
 		handle_stopped_status(child);
-	// fflush(stdout);
-	return (r);
+		return (2);
+	}
+	return (1);
 }

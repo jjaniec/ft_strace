@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/13 17:03:14 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/13 17:28:50 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 17:14:36 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,5 +33,6 @@ unsigned char	get_binary_architecture(const char *abspath)
 		dprintf(STDERR_FILENO, "Invalid ELF class!\n");
 		exit(1);
 	}
+	close(fd);
 	return (elf_class);
 }

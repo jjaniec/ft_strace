@@ -6,13 +6,17 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 15:09:46 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 15:33:55 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-extern t_ft_strace_syscall	g_syscall_table_64[329];
+extern t_ft_strace_syscall	g_syscall_table_64[314];
+
+extern t_ft_strace_syscall	g_syscall_table_32[385];
+
+extern t_ft_strace_opts		*g_ft_strace_opts;
 
 /*
 ** Format & print info on user registers
@@ -78,8 +82,10 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 					t_ft_strace_syscall *table)
 {
 	fflush(stdout);
-	dprintf(INFO_FD, INFO_PREFIX "[%d] => (%3lld) %s", \
-		process, user_regs->orig_rax, table[user_regs->orig_rax].name);
+	if (!g_ft_strace_opts->c)
+		dprintf(INFO_FD, "%s", table[user_regs->orig_rax].name);
+		// dprintf(INFO_FD, INFO_PREFIX "[%d] => (%3lld) %s", \
+		// 	process, user_regs->orig_rax, table[user_regs->orig_rax].name);
 	if (bin_elf_class == ELFCLASS32)
 		cycle_syscall_params(process, bin_elf_class, user_regs->orig_rax, \
 			table[user_regs->orig_rax].reg_types, \

@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/17 14:42:11 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/17 17:11:42 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -80,6 +80,12 @@ fclean: clean
 	@make fclean -C $(FT_PRINTF_DIR)
 	@rm -f $(NAME)
 
+tests_exec:
+	for i in tests/*; do \
+		gcc -m32 -o $$i.32.out $$i; \
+		gcc -m64 -o $$i.64.out $$i; \
+	done;
+
 re: fclean all
 
-.PHONY: clean fclean all re
+.PHONY: clean fclean all re tests_exec
