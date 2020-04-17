@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/08 18:46:02 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 12:34:11 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,18 +106,17 @@ static char		*format_string(char **str)
 	return (0);
 }
 
-static int		print_string(pid_t child, unsigned long reg_value)
+static char		*get_fmt_string(pid_t child, unsigned long reg_value)
 {
 	char		*str;
 
 	str = get_string_from_addr(child, reg_value);
 	if (format_string(&str))
-		return (1);
-	write(STDOUT_FILENO, str, ft_strlen(str));
-	return (0);
+		return (NULL);
+	return (str);
 }
 
-static int		print_string_tab(pid_t child, unsigned long reg_value)
+static char		*get_fmt_string_tab(pid_t child, unsigned long reg_value)
 {
 	unsigned int		i;
 	unsigned long		data;
@@ -139,16 +138,15 @@ static int		print_string_tab(pid_t child, unsigned long reg_value)
 			asprintf(&fmt, "%s", current_str);
 		i++;
 	}
-	ft_printf("[%s]", fmt);
-	free(fmt);
-	return (0);
+	asprintf(&fmt, "[%s]", fmt);
+	return (fmt);
 }
 
 /*
 ** Choose the right method to print a register according to the syscall table
 */
 
-int				format_reg_value(pid_t child, int type, \
+char			*format_reg_value(pid_t child, int type, \
 					unsigned long reg_value)
 {
 	int			printf_fmt_types[] = {
@@ -158,20 +156,22 @@ int				format_reg_value(pid_t child, int type, \
 		"%d", "%zu", "%zd", "%ld", "%u", "%x", "%lu"
 	};
 	int			fmt_index;
+	char		*ret;
 
+	ret = NULL;
 	if (type == UNDEF)
 		return (0);
 	if ((fmt_index = ft_int_index(printf_fmt_types, (sizeof(printf_fmt_types) / sizeof(int)), type)) != -1)
-		ft_printf(printf_fmt_types_str[fmt_index], reg_value);
+		asprintf(&ret, printf_fmt_types_str[fmt_index], reg_value);
 	else if (type == PTR || type == STRUCT)
 		reg_value ? \
-			ft_printf("%p", reg_value) : \
-			ft_printf("NULL");
+			asprintf(&ret, "%p", reg_value) : \
+			asprintf(&ret, "NULL");
 	else if (type == STR)
-		print_string(child, reg_value);
+		ret = get_fmt_string(child, reg_value);
 	else if (type == STR_TAB)
-		print_string_tab(child, reg_value);
+		ret = get_fmt_string_tab(child, reg_value);
 	else
-		ft_printf("%s", "TODO");
-	return (1);
+		asprintf(&ret, "%s", "TODO");
+	return (ret);
 }

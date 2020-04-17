@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/13 18:07:06 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 12:13:00 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ t_ft_strace_syscall	g_syscall_table_32[] = {
 
 static int	handle_execve_err(void)
 {
-	ft_printf(ERR_PREFIX "%s\n", ft_strerror(errno));
+	dprintf(ERR_FD, ERR_PREFIX "%s\n", ft_strerror(errno));
 	exit(1);
 }
 
@@ -153,7 +153,6 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	}
 	else
 		exit(1);
-	printf("Table size: %zu\n", table_size);
 	if (opts->c)
 	{
 		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
@@ -210,7 +209,7 @@ int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char 
 	}
 	if (child)
 	{
-		ft_printf(OK_PREFIX "Child pid: %d\n", child);
+		dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
 		return (handle_child(bin_elf_class, opts, child));
 	}
 	child_process_tasks(exec_path, exec_args, exec_environ);

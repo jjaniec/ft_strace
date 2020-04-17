@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 19:14:00 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 11:59:29 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ static int	handle_stopped_status(pid_t child)
 		return (0);
 	if (status_siginfo.si_signo == SIGCHLD)
 	{
-		dprintf(STDOUT_FILENO, \
+		dprintf(INFO_FD, \
 			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d, si_status=%d, si_utime=%ld, si_stime=%ld} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
@@ -94,7 +94,7 @@ static int	handle_stopped_status(pid_t child)
 	}
 	else if (status_siginfo.si_signo == SIGSEGV)
 	{
-		dprintf(STDOUT_FILENO, \
+		dprintf(INFO_FD, \
 			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
@@ -103,13 +103,13 @@ static int	handle_stopped_status(pid_t child)
 		status_siginfo.si_signo == SIGTSTP || \
 		status_siginfo.si_signo == SIGCONT)
 	{
-		dprintf(STDOUT_FILENO, "--- SIG%s {si_signo=SIG%s, si_code=%s} ---\n", \
+		dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code));
 	}
 	else
 	{
-		dprintf(STDOUT_FILENO, "--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d} ---\n", \
+		dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
 			status_siginfo.si_pid, status_siginfo.si_uid);
@@ -138,13 +138,13 @@ int		handle_wait_status(pid_t child, int status)
 	// printf("SIG status %d\n", status);
 	if (WIFEXITED(status))
 	{
-		dprintf(STDOUT_FILENO, "+++ Exited with %d +++\n", WEXITSTATUS(status));
+		dprintf(INFO_FD, "+++ Exited with %d +++\n", WEXITSTATUS(status));
 		r = 1;
 	}
 	else if (WIFSIGNALED(status))
 	{
 		sig_fmt = str_signo(status);
-		dprintf(STDOUT_FILENO, "+++ Killed by SIG%s +++\n", sig_fmt);
+		dprintf(INFO_FD, "+++ Killed by SIG%s +++\n", sig_fmt);
 		r = 2;
 	}
 	if (WIFSTOPPED(status))

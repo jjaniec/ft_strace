@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 19:29:01 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 12:03:07 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static void		show_usage(void)
 {
-	write(STDOUT_FILENO, INFO_PREFIX "Usage: ./ft_ptrace [-c syscall_count] -- binary arg1 arg2 arg3 ...\n", \
+	write(INFO_FD, INFO_PREFIX "Usage: ./ft_ptrace [-c syscall_count] -- binary arg1 arg2 arg3 ...\n", \
 		ft_strlen(INFO_PREFIX) + 67);
 }
 
@@ -41,6 +41,6 @@ int		main(int ac, char **av, char **environ)
 		write(STDERR_FILENO, ": not found\n", 12);
 		return (1);
 	}
-	ft_printf(OK_PREFIX "Using binary: %s\n", exec_path);
+	dprintf(OK_FD, OK_PREFIX "Using binary: %s\n", exec_path);
 	return (ft_strace(&opts, exec_path, cmd_args, environ));
 }

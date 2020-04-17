@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/13 18:42:46 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 12:35:40 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,10 @@
 # define ERR_PREFIX			"[\e[31m*\e[39m] ft_strace: "
 # define OK_PREFIX			"[\e[32m*\e[39m] ft_strace: "
 # define INFO_PREFIX		"[\e[34m*\e[39m] "
+
+# define ERR_FD				STDERR_FILENO
+# define OK_FD				STDERR_FILENO
+# define INFO_FD			STDERR_FILENO
 
 // Number of chars to print before "..." if the string is longer
 # define PRINTED_STR_LEN	32
@@ -139,7 +143,7 @@ char		*ft_strerror(int errnum);
 
 char		*tostring_errnum(int errnum);
 
-int			format_reg_value(pid_t child, int type, unsigned long reg_value);
+char		*format_reg_value(pid_t child, int type, unsigned long reg_value);
 
 int			format_syscall_flags(pid_t child, unsigned char bin_elf_class, \
 				unsigned long orig_rax, int type, \

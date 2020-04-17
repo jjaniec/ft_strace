@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/29 22:02:11 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/11 19:27:55 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 12:03:16 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ char			**parse_opts(t_ft_strace_opts *opts, int ac, char **av)
 			return (ptr + 1);
 		else
 		{
-			ft_printf(ERR_PREFIX "Unrecognized option: %s\n", (*ptr + 1));
+			dprintf(ERR_FD, ERR_PREFIX "Unrecognized option: %s\n", (*ptr + 1));
 			return (NULL);
 		}
 		ptr++;
