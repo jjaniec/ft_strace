@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/13 17:27:44 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/17 14:42:11 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ SRC_NAME =	main.c \
 			handle_wait_status.c \
 			ft_strerror.c \
 			ft_strace.c \
-			format_syscall_flags.c \
+			get_fmt_flags.c \
 			format_reg_value.c \
 			get_binary_architecture.c
 

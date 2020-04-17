@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 12:34:11 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 14:56:11 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ static char		*get_fmt_string_tab(pid_t child, unsigned long reg_value)
 	unsigned long		data;
 	char				*fmt;
 	char				*current_str;
+	char				*tmp;
 
 	i = 0;
 	while (1)
@@ -133,12 +134,19 @@ static char		*get_fmt_string_tab(pid_t child, unsigned long reg_value)
 			break ;
 		format_string(&current_str);
 		if (i)
+		{
+			tmp = fmt;
 			asprintf(&fmt, "%s, %s", fmt, current_str);
+			free(tmp);
+		}
 		else
 			asprintf(&fmt, "%s", current_str);
+		free(current_str);
 		i++;
 	}
+	tmp = fmt;
 	asprintf(&fmt, "[%s]", fmt);
+	free(tmp);
 	return (fmt);
 }
 

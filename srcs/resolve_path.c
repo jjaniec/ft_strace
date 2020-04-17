@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:32:51 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/03/28 16:32:52 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 15:02:20 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,13 @@ char	*resolve_path(char *cmd, char **environ)
 		buffer[path_len] = '/';
 		ft_strcpy(buffer + path_len + 1, cmd);
 		if (is_path_valid(buffer))
+		{
+			free(*path_dirs);
 			return (ft_strdup(buffer));
+		}
+		free(*path_dirs);
 		path_dirs++;
 	}
+	free(path_dirs);
 	return (NULL);
 }

@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 12:35:40 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 14:37:37 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ char		*tostring_errnum(int errnum);
 
 char		*format_reg_value(pid_t child, int type, unsigned long reg_value);
 
-int			format_syscall_flags(pid_t child, unsigned char bin_elf_class, \
+char		*get_fmt_flags(pid_t child, unsigned char bin_elf_class, \
 				unsigned long orig_rax, int type, \
 				unsigned long reg_value);
 

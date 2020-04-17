@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 12:38:20 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/17 15:09:46 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,24 +34,38 @@ static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 					unsigned long orig_rax, int syscall_reg_types[6], \
 					unsigned long pre_user_regs[6])
 {
+	char	*ret;
 	char	*s;
+	char	*tmp;
 
-	write(INFO_FD, "(", 1);
+	ret = NULL;
+	// write(INFO_FD, "(", 1);
 	for (unsigned int i = 0; i < 6 && syscall_reg_types[i] != UNDEF; i++)
 	{
 		s = NULL;
-		if (i)
-			write(INFO_FD, ", ", 2);
+		// if (i)
+			// write(INFO_FD, ", ", 2);
 		if (ft_int_index((int []) { \
 				FLAGS, MAP_PROT \
 			}, 2, syscall_reg_types[i]) != -1)
-			format_syscall_flags(child, bin_elf_class, orig_rax, syscall_reg_types[i], pre_user_regs[i]);
+			s = get_fmt_flags(child, bin_elf_class, orig_rax, syscall_reg_types[i], pre_user_regs[i]);
 		else if (!(s = format_reg_value(child, syscall_reg_types[i], pre_user_regs[i])))
 			break ;
-		//
-		if (s)
-			dprintf(INFO_FD, s);
+		if (ret)
+		{
+			tmp = ret;
+			asprintf(&ret, "%s, %s", ret, s);
+			free(s);
+			free(tmp);
+		}
+		else
+		{
+			asprintf(&ret, "(%s", s);
+			free(s);
+		}
 	}
+	dprintf(INFO_FD, "%s", ret);
+	free(ret);
 	return (0);
 }
 
@@ -93,15 +107,14 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 					t_ft_strace_syscall *table)
 {
 	char		*s;
-	// fflush(stdout);
-	// write(INFO_FD, ") = ", 4);
+
 	if (table[user_regs->orig_rax].reg_ret_type == INT && \
 		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
 		asprintf(&s, "-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
 	else
 		s = format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax);
-	// write(INFO_FD, "\n", 1);
 	dprintf(INFO_FD, ") = %s\n", s);
+	free(s);
 	return (0);
 }
 
