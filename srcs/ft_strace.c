@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 19:42:38 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 19:50:55 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,7 +209,7 @@ static int	print_next_syscall(pid_t child, unsigned char bin_elf_class, \
 		return (1);
 	if (cont_process(child, &status, post_user_regs))
 	{
-		dprintf(INFO_FD, "= ?\n");
+		dprintf(INFO_FD, ") = ?\n");
 		return (1);
 	}
 	if (buffer_param_index != -1)

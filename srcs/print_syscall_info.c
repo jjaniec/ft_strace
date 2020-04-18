@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 19:42:17 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 20:20:39 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 			} + regs_offset, regs_max_count);
 	if (!regs_offset)
 		printed += dprintf(INFO_FD, "%s(", table[user_regs->orig_rax].name);
-	printed += dprintf(INFO_FD, "%s", ret);
+	printed += dprintf(INFO_FD, (!regs_offset) ? ("%s") : (", %s"), ret);
 	if (regs_offset + regs_max_count == 6)
 		printed += dprintf(INFO_FD, ")");
 	free(ret);
@@ -116,17 +116,19 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 */
 
 static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *user_regs, \
-					t_ft_strace_syscall *table)
+					t_ft_strace_syscall *table, int total_printed)
 {
 	int			printed;
 	char		*s;
 
+	// printf("|Total printed %d\n", total_printed);
 	if (table[user_regs->orig_rax].reg_ret_type == INT && \
 		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
 		asprintf(&s, "-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
 	else
 		s = format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax);
-	printed = dprintf(INFO_FD, "= %s\n", s);
+	printed = dprintf(INFO_FD, "%*s= %s\n", \
+		(total_printed > 40) ? (0) : (40 - total_printed), "", s);
 	free(s);
 	return (printed);
 }
@@ -139,19 +141,23 @@ int				print_syscall_info(pid_t process, bool regs_type, \
 					t_ft_strace_syscall *table,
 					unsigned int regs_offset, unsigned int regs_max_count)
 {
+	static int	total_printed;
 	int			printed;
 
+	if (!regs_offset && regs_type == PRE_SYSCALL_REGS)
+		total_printed = 0;
 	printed = 0;
 	if (regs_type == PRE_SYSCALL_REGS)
 	{
 		// printf("Print %u params w/ offset %u\n", regs_max_count, regs_offset);
 		if (user_regs->orig_rax < ( sizeof(g_syscall_table_64) / sizeof(t_ft_strace_syscall) ))
-			return (print_valid_pre_syscall(process, bin_elf_class, user_regs, \
-				table, regs_offset, regs_max_count));
+			printed = print_valid_pre_syscall(process, bin_elf_class, user_regs, \
+				table, regs_offset, regs_max_count);
 		else
 			handle_invalid_syscall_id(process, user_regs);
 	}
 	else if (regs_type == POST_SYSCALL_REGS)
-		return (print_valid_post_syscall(process, user_regs, table));
-	return (0);
+		printed = print_valid_post_syscall(process, user_regs, table, total_printed);
+	total_printed += printed;
+	return (printed);
 }
