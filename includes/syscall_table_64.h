@@ -232,7 +232,7 @@
 { "exit_group", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
 { "epoll_wait", {INT, PTR, INT, INT, UNDEF, UNDEF}, INT },
 { "epoll_ctl", {INT, INT, INT, PTR, UNDEF, UNDEF}, INT },
-{ "tgkill", {INT, INT, INT, UNDEF, UNDEF, UNDEF}, INT },
+{ "tgkill", {INT, INT, SIGNO, UNDEF, UNDEF, UNDEF}, INT },
 { "utimes", {STR, PTR, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 { "vserver", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
 { "mbind", {PTR, ULONG, INT, PTR, ULONG, UINT}, LONG },

@@ -3,79 +3,79 @@
 */
 
 /* POSIX signals */
-	"HUP", /* 1 */
-	"INT", /* 2 */
-	"QUIT", /* 3 */
-	"ILL", /* 4 */
+[ 1] = "HUP", /* 1 */
+[ 2] = "INT", /* 2 */
+[ 3] = "QUIT", /* 3 */
+[ 4] = "ILL", /* 4 */
 #ifdef SIGTRAP
-	"TRAP", /* 5 */
+[ 5] = "TRAP", /* 5 */
 #endif
-	"ABRT", /* 6 */
+[ 6] = "ABRT", /* 6 */
 #ifdef SIGIOT
-	"IOT", /* 6, same as SIGABRT */
+[ 6] = "IOT", /* 6, same as SIGABRT */
 #endif
 #ifdef SIGEMT
-	"EMT", /* 7 (mips,alpha,sparc*) */
+[ 7] = "EMT", /* 7 (mips,alpha,sparc*) */
 #endif
 #ifdef SIGBUS
-	"BUS", /* 7 (arm,i386,m68k,ppc), 10 (mips,alpha,sparc*) */
+[ 7] = "BUS", /* 7 (arm,i386,m68k,ppc), 10 (mips,alpha,sparc*) */
 #endif
-	"FPE", /* 8 */
-	"KILL", /* 9 */
-	"USR1", /* 10 (arm,i386,m68k,ppc), 30 (alpha,sparc*), 16 (mips) */
-	"SEGV", /* 11 */
-	"USR2", /* 12 (arm,i386,m68k,ppc), 31 (alpha,sparc*), 17 (mips) */
-	"PIPE", /* 13 */
-	"ALRM", /* 14 */
-	"TERM", /* 15 */
+[ 8] = "FPE", /* 8 */
+[ 9] = "KILL", /* 9 */
+[10] = "USR1", /* 10 (arm,i386,m68k,ppc), 30 (alpha,sparc*), 16 (mips) */
+[11] = "SEGV", /* 11 */
+[12] = "USR2", /* 12 (arm,i386,m68k,ppc), 31 (alpha,sparc*), 17 (mips) */
+[13] = "PIPE", /* 13 */
+[14] = "ALRM", /* 14 */
+[15] = "TERM", /* 15 */
 #ifdef SIGSTKFLT
-	"STKFLT", /* 16 (arm,i386,m68k,ppc) */
+[16] = "STKFLT", /* 16 (arm,i386,m68k,ppc) */
 #endif
-	"CHLD", /* 17 (arm,i386,m68k,ppc), 20 (alpha,sparc*), 18 (mips) */
+[17] = "CHLD", /* 17 (arm,i386,m68k,ppc), 20 (alpha,sparc*), 18 (mips) */
 #ifdef SIGCLD
-	"CLD", /* same as SIGCHLD (mips) */
+[18] = "CLD", /* same as SIGCHLD (mips) */
 #endif
-	"CONT", /* 18 (arm,i386,m68k,ppc), 19 (alpha,sparc*), 25 (mips) */
-	"STOP", /* 19 (arm,i386,m68k,ppc), 17 (alpha,sparc*), 23 (mips) */
-	"TSTP", /* 20 (arm,i386,m68k,ppc), 18 (alpha,sparc*), 24 (mips) */
-	"TTIN", /* 21 (arm,i386,m68k,ppc,alpha,sparc*), 26 (mips) */
-	"TTOU", /* 22 (arm,i386,m68k,ppc,alpha,sparc*), 27 (mips) */
+[18] = "CONT", /* 18 (arm,i386,m68k,ppc), 19 (alpha,sparc*), 25 (mips) */
+[19] = "STOP", /* 19 (arm,i386,m68k,ppc), 17 (alpha,sparc*), 23 (mips) */
+[20] = "TSTP", /* 20 (arm,i386,m68k,ppc), 18 (alpha,sparc*), 24 (mips) */
+[21] = "TTIN", /* 21 (arm,i386,m68k,ppc,alpha,sparc*), 26 (mips) */
+[22] = "TTOU", /* 22 (arm,i386,m68k,ppc,alpha,sparc*), 27 (mips) */
 #ifdef SIGURG
-	"URG", /* 23 (arm,i386,m68k,ppc), 16 (alpha,sparc*), 21 (mips) */
+[23] = "URG", /* 23 (arm,i386,m68k,ppc), 16 (alpha,sparc*), 21 (mips) */
 #endif
 #ifdef SIGXCPU
-	"XCPU", /* 24 (arm,i386,m68k,ppc,alpha,sparc*), 30 (mips) */
+[24] = "XCPU", /* 24 (arm,i386,m68k,ppc,alpha,sparc*), 30 (mips) */
 #endif
 #ifdef SIGXFSZ
-	"XFSZ", /* 25 (arm,i386,m68k,ppc,alpha,sparc*), 31 (mips) */
+[25] = "XFSZ", /* 25 (arm,i386,m68k,ppc,alpha,sparc*), 31 (mips) */
 #endif
 #ifdef SIGVTALRM
-	"VTALRM", /* 26 (arm,i386,m68k,ppc,alpha,sparc*), 28 (mips) */
+[26] = "VTALRM", /* 26 (arm,i386,m68k,ppc,alpha,sparc*), 28 (mips) */
 #endif
 #ifdef SIGPROF
-	"PROF", /* 27 (arm,i386,m68k,ppc,alpha,sparc*), 29 (mips) */
+[27] = "PROF", /* 27 (arm,i386,m68k,ppc,alpha,sparc*), 29 (mips) */
 #endif
 #ifdef SIGWINCH
-	"WINCH", /* 28 (arm,i386,m68k,ppc,alpha,sparc*), 20 (mips) */
+[28] = "WINCH", /* 28 (arm,i386,m68k,ppc,alpha,sparc*), 20 (mips) */
 #endif
 #ifdef SIGIO
-	"IO",	 /* 29 (arm,i386,m68k,ppc), 23 (alpha,sparc*), 22 (mips) */
+[29] = "IO",	 /* 29 (arm,i386,m68k,ppc), 23 (alpha,sparc*), 22 (mips) */
 #endif
 #ifdef SIGPOLL
-	"POLL", /* same as SIGIO */
+[30] = "POLL", /* same as SIGIO */
 #endif
 #ifdef SIGINFO
-	"INFO", /* 29 (alpha) */
+[29] = "INFO", /* 29 (alpha) */
 #endif
 #ifdef SIGLOST
-	"LOST", /* 29 (arm,i386,m68k,ppc,sparc*) */
+[29] = "LOST", /* 29 (arm,i386,m68k,ppc,sparc*) */
 #endif
 #ifdef SIGPWR
-	"PWR", /* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
+[30] = "PWR", /* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
 #endif
 #ifdef SIGUNUSED
-	"UNUSED", /* 31 (arm,i386,m68k,ppc) */
+[31] = "UNUSED", /* 31 (arm,i386,m68k,ppc) */
 #endif
 #ifdef SIGSYS
-	"SYS", /* 31 (mips,alpha,sparc*) */
+[31] = "SYS", /* 31 (mips,alpha,sparc*) */
 #endif

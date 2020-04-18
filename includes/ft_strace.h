@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 14:37:37 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 16:20:07 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,8 @@ enum e_systypes	{
 	MAP_PROT,
 	HEX,
 	ULONG,
-	MAP
+	MAP,
+	SIGNO
 };
 
 /*
@@ -155,5 +156,7 @@ int			show_calls_summary(t_ft_strace_syscall *table, size_t table_size, \
 				t_ft_strace_syscall_exec_info *exec_infos);
 
 unsigned char	get_binary_architecture(const char *abspath);
+
+char		*str_signo(int sig);
 
 #endif

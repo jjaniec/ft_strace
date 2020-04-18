@@ -6,20 +6,11 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 20:15:31 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 16:19:31 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
-
-char		*sys_signame[] = {
-	#include "./sys_signame.h"
-};
-
-static char		*str_signo(int sig)
-{
-	return (sys_signame[sig]);
-}
 
 /*
 ** https://sites.uclouvain.be/SystInfo/usr/include/bits/siginfo.h.html
@@ -98,6 +89,7 @@ static int	handle_stopped_status(pid_t child)
 			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
+		dprintf(INFO_FD, "+++ killed by SIG%s +++\nSegmentation fault\n", str_signo(status_siginfo.si_signo));
 		exit(status_siginfo.si_signo);
 	}
 	else if (status_siginfo.si_signo == SIGINT || \
@@ -110,11 +102,12 @@ static int	handle_stopped_status(pid_t child)
 	}
 	else
 	{
+		// dprintf(STDERR_FILENO, "Sig code=%d\n", status_siginfo.si_signo);
 		dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d} ---\n", \
 			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
 			status_siginfo.si_pid, status_siginfo.si_uid);
-		exit(status_siginfo.si_signo);
+		// exit(status_siginfo.si_signo);
 	}
 	return (status_siginfo.si_signo);
 }

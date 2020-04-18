@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 16:46:54 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 16:23:16 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,8 @@ char			*format_reg_value(pid_t child, int type, \
 		ret = get_fmt_string(child, reg_value);
 	else if (type == STR_TAB)
 		ret = get_fmt_string_tab(child, reg_value);
+	else if (type == SIGNO)
+		asprintf(&ret, "SIG%s", str_signo(reg_value));
 	else
 		asprintf(&ret, "%s", "TODO");
 	return (ret);
