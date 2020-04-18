@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 15:33:55 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 17:28:24 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,8 @@ static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 		// if (i)
 			// write(INFO_FD, ", ", 2);
 		if (ft_int_index((int []) { \
-				FLAGS, MAP_PROT \
-			}, 2, syscall_reg_types[i]) != -1)
+				FLAGS, MAP_PROT, O_FLAGS \
+			}, 3, syscall_reg_types[i]) != -1)
 			s = get_fmt_flags(child, bin_elf_class, orig_rax, syscall_reg_types[i], pre_user_regs[i]);
 		else if (!(s = format_reg_value(child, syscall_reg_types[i], pre_user_regs[i])))
 			break ;

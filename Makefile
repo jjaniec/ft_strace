@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/18 16:22:12 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/18 16:42:35 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,6 +26,10 @@ SRC_NAME =	main.c \
 			format_reg_value.c \
 			get_binary_architecture.c \
 			str_signo.c
+
+INCLUDES_NAME = ft_strace.h \
+				syscall_table_32.h \
+				syscall_table_64.h
 
 SRC_DIR = ./srcs/
 INCLUDES_DIR = ./includes/
@@ -63,7 +67,7 @@ ifeq ($(UNAME_S),Darwin)
 	@$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) -o $(NAME)
 endif
 
-$(OBJ_DIR)%.o : $(SRC_DIR)%.c $(INCLUDES_DIR)/ft_strace.h
+$(OBJ_DIR)%.o : $(SRC_DIR)%.c includes/ft_strace.h
 	@mkdir -p $(OBJ_DIR)
 	@gcc $(CFLAGS) -c $(IFLAGS) $< -o $@ && $(call ui_line, $@, $(NAME))
 
@@ -83,8 +87,8 @@ fclean: clean
 
 tests_exec:
 	for i in tests/*; do \
-		gcc -m32 -o $$i.32.out $$i; \
-		gcc -m64 -o $$i.64.out $$i; \
+		gcc -pthread -m32 -o $$i.32.out $$i; \
+		gcc -pthread -m64 -o $$i.64.out $$i; \
 	done;
 
 re: fclean all

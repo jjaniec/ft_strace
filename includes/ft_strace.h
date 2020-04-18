@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 16:20:07 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 17:41:02 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include <string.h> //strsignal
 # include <signal.h> // signal definitions
 # include <elf.h>
+# include <fcntl.h>
 
 
 // Buffer len used for path resolution of executables passed as arguments
@@ -100,6 +101,21 @@ typedef struct s_ft_strace_syscall_exec_info {
 	"MAP_LOCKED", "MAP_NONBLOCK", "MAP_NORESERVE", "MAP_POPULATE", "MAP_STACK" \
 }
 
+# define O_FLAGS_LEN			13
+
+# define O_FLAGS_VALUES (long[]) { \
+	O_RDONLY, O_WRONLY, O_RDWR, O_ACCMODE, O_NONBLOCK, \
+	O_APPEND, O_ASYNC, O_FSYNC, O_NOFOLLOW, O_CREAT, \
+	O_TRUNC, O_EXCL, O_CLOEXEC \
+}
+
+# define O_FLAGS_FMT (char*[]) { \
+	"O_RDONLY", "O_WRONLY", "O_RDWR", "O_ACCMODE", "O_NONBLOCK", \
+	"O_APPEND", "O_ASYNC", "O_FSYNC", "O_NOFOLLOW", "O_CREAT", \
+	"O_TRUNC", "O_EXCL", "O_CLOEXEC" \
+}
+
+
 // Syscall parameters / returns types
 
 enum e_systypes	{
@@ -119,7 +135,8 @@ enum e_systypes	{
 	HEX,
 	ULONG,
 	MAP,
-	SIGNO
+	SIGNO,
+	O_FLAGS
 };
 
 /*

@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 20:26:18 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 17:05:46 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,6 @@ static int		block_sigs(void)
 
 static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
 {
-	pid_t	waited;
-
 	while (1)
 	{
 		if (ptrace(PTRACE_SYSCALL, process, 0, 0) < 0)
@@ -188,6 +186,7 @@ static int	init_ptrace(pid_t child, int *status)
 	}
 	block_sigs();
 	ptrace(PTRACE_SETOPTIONS, child, NULL, PTRACE_O_TRACESYSGOOD);
+	return (0);
 }
 
 static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid_t child)
@@ -220,11 +219,12 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 		ft_memset(exec_infos, 0, sizeof(t_ft_strace_syscall_exec_info) * table_size);
 	}
 	dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
-	while (1 || opts->d != 0)
+	while ("42 and beyond")
 	{
 		if (cont_process(child, &status, &pre_user_regs) || \
-			print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, &pre_user_regs, table) || \
-			cont_process(child, &status, &post_user_regs) || \
+			print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, &pre_user_regs, table))
+			break ;
+		if (cont_process(child, &status, &post_user_regs) || \
 			print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, &post_user_regs, table))
 			break ;
 		if (opts->c)

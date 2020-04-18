@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 15:24:55 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 15:10:36 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 17:50:10 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,24 +21,21 @@ static char	*fmt_flag_list(pid_t child, unsigned long reg_value, \
 {
 	char		*s;
 	char		*tmp;
-	bool		add_pipe;
 
 	(void)child;
-	add_pipe = false;
 	s = NULL;
 	for (unsigned int i = 0; i < flag_list->size; i++)
 	{
-		tmp = s;
-		if (reg_value & flag_list->flags[i])
+		if (reg_value & flag_list->flags[i] || reg_value == flag_list->flags[i])
 		{
-			if (add_pipe)
+			if (s)
 			{
+				tmp = s;
 				asprintf(&s, "%s|%s", s, flag_list->flags_fmt[i]);
 				free(tmp);
 			}
 			else
-				asprintf(&s, flag_list->flags_fmt[i]);
-			add_pipe = true;
+				asprintf(&s, "%s", flag_list->flags_fmt[i]);
 		}
 	}
 	return (s);
@@ -61,6 +58,9 @@ char		*get_fmt_flags(pid_t child, unsigned char bin_elf_class, \
 	t_ft_strace_flag_list	MAP_FLAGS = {
 		MAP_FLAGS_VALUES, MAP_FLAGS_FMT, MAP_FLAGS_LEN
 	};
+	t_ft_strace_flag_list	O_FLAGS_ = {
+		O_FLAGS_VALUES, O_FLAGS_FMT, O_FLAGS_LEN
+	};
 
 	char	*ret;
 	/* mmap / mmap2 / mprotect */
@@ -71,6 +71,12 @@ char		*get_fmt_flags(pid_t child, unsigned char bin_elf_class, \
 			ret = fmt_flag_list(child, reg_value, &MAP_PROT_FLAGS);
 		else if (type == FLAGS)
 			ret = fmt_flag_list(child, reg_value, &MAP_FLAGS);
+	}
+	/* openat */
+	else if ((bin_elf_class == ELFCLASS64 && (orig_rax == 257)))
+	{
+		if (type == O_FLAGS)
+			ret = fmt_flag_list(child, reg_value, &O_FLAGS_);
 	}
 	else
 		asprintf(&ret, "{FLAGS}");

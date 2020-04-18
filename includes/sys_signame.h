@@ -79,3 +79,13 @@
 #ifdef SIGSYS
 [31] = "SYS", /* 31 (mips,alpha,sparc*) */
 #endif
+
+/*
+** SIGRTMIN to STGRTMAX
+** http://man7.org/linux/man-pages/man7/signal.7.html
+** If SIGRTMIN & SIGRTMAX macros has been changed add SIGRT strings here
+*/
+
+[34] = "RTMIN",
+[35] = "RT_1"
+// ...
