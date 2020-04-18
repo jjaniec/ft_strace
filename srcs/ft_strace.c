@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 17:05:46 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 19:42:38 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,8 +170,10 @@ static int		update_syscall_exec_infos(t_ft_strace_syscall *table, \
 ** Restart the stopped tracee process.
 */
 
-static int	init_ptrace(pid_t child, int *status)
+static int	init_ptrace(pid_t child)
 {
+	int		status;
+
 	if (ptrace(PTRACE_SEIZE, child, NULL, 0) < 0)
 	{
 		dprintf(ERR_FD, "PTRACE_SEIZE");
@@ -179,7 +181,7 @@ static int	init_ptrace(pid_t child, int *status)
 		exit(EXIT_FAILURE);
 	}
 	allow_sigs();
-	if (waitpid(child, status, 0) < 0)
+	if (waitpid(child, &status, 0) < 0)
 	{
 		perror("waitpid");
 		exit(EXIT_FAILURE);
@@ -189,11 +191,44 @@ static int	init_ptrace(pid_t child, int *status)
 	return (0);
 }
 
+static int	print_next_syscall(pid_t child, unsigned char bin_elf_class, \
+				t_ft_strace_opts *opts, t_ft_strace_syscall *table, \
+				struct user_regs_struct *pre_user_regs, struct user_regs_struct *post_user_regs)
+{
+	int		status;
+	int		buffer_param_index;
+
+	(void)opts;
+	if (cont_process(child, &status, pre_user_regs))
+		return (1);
+	buffer_param_index = ft_int_index(table[pre_user_regs->orig_rax].reg_types, 6, BUFFER);
+	// if (buffer_param_index != -1)
+		// dprintf(INFO_FD, "BUFFER_INDEX %d\n", buffer_param_index);
+	if (!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
+		0, (buffer_param_index == -1) ? (6) : (buffer_param_index)))
+		return (1);
+	if (cont_process(child, &status, post_user_regs))
+	{
+		dprintf(INFO_FD, "= ?\n");
+		return (1);
+	}
+	if (buffer_param_index != -1)
+	{
+		// printf("BUFFER PARAM INDEX: %d\n", buffer_param_index);
+		if (!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
+			buffer_param_index, (6 - (buffer_param_index))))
+			return (1);
+	}
+	if (!print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, post_user_regs, table, \
+		0, 6))
+		return (1);
+	return (0);
+}
+
 static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid_t child)
 {
 	struct user_regs_struct			pre_user_regs;
 	struct user_regs_struct			post_user_regs;
-	int 							status;
 	t_ft_strace_syscall				*table;
 	t_ft_strace_syscall_exec_info	*exec_infos;
 	size_t							table_size;
@@ -212,7 +247,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	else
 		exit(EXIT_FAILURE);
 	// printf("%d ELF Class: %x - 32: %x - 64: %x\n", child, bin_elf_class, ELFCLASS32, ELFCLASS64);
-	init_ptrace(child, &status);
+	init_ptrace(child);
 	if (opts->c)
 	{
 		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
@@ -221,11 +256,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
 	while ("42 and beyond")
 	{
-		if (cont_process(child, &status, &pre_user_regs) || \
-			print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, &pre_user_regs, table))
-			break ;
-		if (cont_process(child, &status, &post_user_regs) || \
-			print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, &post_user_regs, table))
+		if (print_next_syscall(child, bin_elf_class, opts, table, &pre_user_regs, &post_user_regs))
 			break ;
 		if (opts->c)
 			update_syscall_exec_infos(table, exec_infos, &post_user_regs);

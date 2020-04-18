@@ -1,7 +1,7 @@
 [0] = {"restart_syscall", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT},
 [1] = {"exit", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID},
 [2] = {"fork", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT},
-[3] = {"read", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T},
+[3] = {"read", {INT, BUFFER, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T},
 [4] = {"write", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T},
 [5] = {"open", {STR, FLAGS, UNDEF, UNDEF, UNDEF, UNDEF}, INT},
 [6] = {"close", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT},

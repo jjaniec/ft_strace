@@ -1,4 +1,4 @@
-{ "read", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
+{ "read", {INT, BUFFER, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
 { "write", {INT, STR, SIZE_T, UNDEF, UNDEF, UNDEF}, SSIZE_T },
 { "open", {STR, FLAGS, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 { "close", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },

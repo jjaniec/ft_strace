@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 17:41:02 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 18:40:10 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,8 @@ enum e_systypes	{
 	ULONG,
 	MAP,
 	SIGNO,
-	O_FLAGS
+	O_FLAGS,
+	BUFFER
 };
 
 /*
@@ -153,7 +154,8 @@ char		**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
 int				print_syscall_info(pid_t process, bool regs_type, \
 					unsigned char bin_elf_class, \
 					struct user_regs_struct *user_regs, \
-					t_ft_strace_syscall *table);
+					t_ft_strace_syscall *table,
+					unsigned int regs_offset, unsigned int regs_max_count);
 
 // ft_strerror.c
 

@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 16:23:16 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 19:30:59 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,8 @@ static char		*format_string(char **str)
 	char	*new_str;
 	char	*tmp;
 
+	if (!*str)
+		return (ft_strdup("NULL"));
 	tmp = escape_string(*str);
 	if (ft_strlen(*str) > 32)
 		asprintf(&new_str, "\"%.32s\"...", tmp);
@@ -179,7 +181,7 @@ char			*format_reg_value(pid_t child, int type, \
 		reg_value ? \
 			asprintf(&ret, "%p", reg_value) : \
 			asprintf(&ret, "0", reg_value);
-	else if (type == STR)
+	else if (type == STR || type == BUFFER)
 		ret = get_fmt_string(child, reg_value);
 	else if (type == STR_TAB)
 		ret = get_fmt_string_tab(child, reg_value);

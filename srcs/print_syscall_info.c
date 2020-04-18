@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 17:28:24 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 19:42:17 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ static int		handle_invalid_syscall_id(pid_t process, struct user_regs_struct *pr
 ** Cycle through syscall parameters and print it with format_reg_value()
 */
 
-static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
+static char		*cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 					unsigned long orig_rax, int syscall_reg_types[6], \
-					unsigned long pre_user_regs[6])
+					unsigned long pre_user_regs[6], unsigned int regs_max_count)
 {
 	char	*ret;
 	char	*s;
@@ -44,7 +44,7 @@ static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 
 	ret = NULL;
 	// write(INFO_FD, "(", 1);
-	for (unsigned int i = 0; i < 6 && syscall_reg_types[i] != UNDEF; i++)
+	for (unsigned int i = 0; i < regs_max_count && syscall_reg_types[i] != UNDEF; i++)
 	{
 		s = NULL;
 		// if (i)
@@ -55,7 +55,7 @@ static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 			s = get_fmt_flags(child, bin_elf_class, orig_rax, syscall_reg_types[i], pre_user_regs[i]);
 		else if (!(s = format_reg_value(child, syscall_reg_types[i], pre_user_regs[i])))
 			break ;
-		if (ret)
+		if (i)
 		{
 			tmp = ret;
 			asprintf(&ret, "%s, %s", ret, s);
@@ -64,13 +64,11 @@ static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 		}
 		else
 		{
-			asprintf(&ret, "(%s", s);
+			asprintf(&ret, "%s", s);
 			free(s);
 		}
 	}
-	dprintf(INFO_FD, "%s", ret);
-	free(ret);
-	return (0);
+	return (ret);
 }
 
 /*
@@ -79,28 +77,36 @@ static int		cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 
 static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, \
 					struct user_regs_struct *user_regs, \
-					t_ft_strace_syscall *table)
+					t_ft_strace_syscall *table, \
+					unsigned int regs_offset, unsigned int regs_max_count)
 {
-	fflush(stdout);
-	if (!g_ft_strace_opts->c)
-		dprintf(INFO_FD, "%s", table[user_regs->orig_rax].name);
+	int		printed;
+	char	*ret;
+
 		// dprintf(INFO_FD, INFO_PREFIX "[%d] => (%3lld) %s", \
 		// 	process, user_regs->orig_rax, table[user_regs->orig_rax].name);
+	printed = 0;
 	if (bin_elf_class == ELFCLASS32)
-		cycle_syscall_params(process, bin_elf_class, user_regs->orig_rax, \
-			table[user_regs->orig_rax].reg_types, \
+		ret = cycle_syscall_params(process, bin_elf_class, user_regs->orig_rax, \
+			table[user_regs->orig_rax].reg_types + regs_offset, \
 			(unsigned long[6]) {
 				user_regs->rbx, user_regs->rcx, user_regs->rdx, \
 				user_regs->rsi, user_regs->rdi, user_regs->rbp
-			});
+			} + regs_offset, regs_max_count);
 	else if (bin_elf_class == ELFCLASS64)
-		cycle_syscall_params(process, bin_elf_class, user_regs->orig_rax, \
-			table[user_regs->orig_rax].reg_types, \
+		ret = cycle_syscall_params(process, bin_elf_class, user_regs->orig_rax, \
+			table[user_regs->orig_rax].reg_types + regs_offset, \
 			(unsigned long[6]) {
 				user_regs->rdi, user_regs->rsi, user_regs->rdx, \
 				user_regs->r10, user_regs->r8, user_regs->r9
-			});
-	return (0);
+			} + regs_offset, regs_max_count);
+	if (!regs_offset)
+		printed += dprintf(INFO_FD, "%s(", table[user_regs->orig_rax].name);
+	printed += dprintf(INFO_FD, "%s", ret);
+	if (regs_offset + regs_max_count == 6)
+		printed += dprintf(INFO_FD, ")");
+	free(ret);
+	return (printed);
 }
 
 /*
@@ -112,6 +118,7 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *user_regs, \
 					t_ft_strace_syscall *table)
 {
+	int			printed;
 	char		*s;
 
 	if (table[user_regs->orig_rax].reg_ret_type == INT && \
@@ -119,9 +126,9 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 		asprintf(&s, "-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
 	else
 		s = format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax);
-	dprintf(INFO_FD, ") = %s\n", s);
+	printed = dprintf(INFO_FD, "= %s\n", s);
 	free(s);
-	return (0);
+	return (printed);
 }
 
 
@@ -129,12 +136,18 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 int				print_syscall_info(pid_t process, bool regs_type, \
 					unsigned char bin_elf_class, \
 					struct user_regs_struct *user_regs, \
-					t_ft_strace_syscall *table)
+					t_ft_strace_syscall *table,
+					unsigned int regs_offset, unsigned int regs_max_count)
 {
+	int			printed;
+
+	printed = 0;
 	if (regs_type == PRE_SYSCALL_REGS)
 	{
+		// printf("Print %u params w/ offset %u\n", regs_max_count, regs_offset);
 		if (user_regs->orig_rax < ( sizeof(g_syscall_table_64) / sizeof(t_ft_strace_syscall) ))
-			print_valid_pre_syscall(process, bin_elf_class, user_regs, table);
+			return (print_valid_pre_syscall(process, bin_elf_class, user_regs, \
+				table, regs_offset, regs_max_count));
 		else
 			handle_invalid_syscall_id(process, user_regs);
 	}
