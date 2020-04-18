@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 19:50:55 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 20:55:30 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,88 +45,6 @@ static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_e
 }
 
 /*
-** Set ptrace options & read user section to gather syscall numbers & parameters
-**
-** PTRACE_GETREGS, PTRACE_GETFPREGS:
-** Copy the tracee's general-purpose or floating-point registers,
-** respectively, to the address data in the tracer.
-**
-** waitpid macro int WSTOPSIG (int status):
-** If WIFSTOPPED is true of status, this macro returns
-** the signal number of the signal that caused the child process to stop.
-*/
-
-static int		allow_sigs(void)
-{
-	sigset_t	sigmask;
-
-	if (sigemptyset(&sigmask) < 0)
-	{
-		perror("sigemptyset");
-		exit(EXIT_FAILURE);
-	}
-	if (sigprocmask(SIG_SETMASK, &sigmask, NULL) < 0)
-	{
-		perror("sigprocmask");
-		exit(EXIT_FAILURE);
-	}
-	return (0);
-}
-
-static int		block_sigs(void)
-{
-	sigset_t	sigmask;
-
-	if (sigemptyset(&sigmask) < 0)
-	{
-		perror("sigemptyset");
-		exit(EXIT_FAILURE);
-	}
-	if (sigaddset(&sigmask, SIGINT) < 0 || \
-		sigaddset(&sigmask, SIGQUIT) < 0 || \
-		sigaddset(&sigmask, SIGTERM) < 0 || \
-		sigaddset(&sigmask, SIGHUP) < 0 || \
-		sigaddset(&sigmask, SIGPIPE) < 0)
-	{
-		perror("sigaddset");
-		exit(EXIT_FAILURE);
-	}
-	if (sigprocmask(SIG_BLOCK, &sigmask, NULL) < 0)
-	{
-		perror("sigprocmask");
-		exit(EXIT_FAILURE);
-	}
-	return (0);
-}
-
-static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
-{
-	while (1)
-	{
-		if (ptrace(PTRACE_SYSCALL, process, 0, 0) < 0)
-		{
-			perror("ptrace");
-			exit(EXIT_FAILURE);
-		}
-		allow_sigs();
-		if (waitpid(process, status, 0) < 0)
-		{
-			perror("waitpid");
-			exit(EXIT_FAILURE);
-		}
-		block_sigs();
-		if (handle_wait_status(process, *status) == 0)
-			break ;
-	}
-	if (ptrace(PTRACE_GETREGS, process, 0, user_regs) < 0)
-	{
-		perror("ptrace");
-		exit(EXIT_FAILURE);
-	}
-	return (0);
-}
-
-/*
 ** Update call & error count of last syscall
 */
 
@@ -157,15 +75,6 @@ static int		update_syscall_exec_infos(t_ft_strace_syscall *table, \
 ** it easy for the tracer to distinguish normal traps from
 ** those caused by a system call.
 **
-** PTRACE_SYSCALL, PTRACE_SINGLESTEP:
-** Restart the stopped tracee as for PTRACE_CONT, but arrange for
-** the tracee to be stopped at the next entry to or exit from a
-** system call, or after execution of a single instruction,
-** respectively.  (The tracee will also, as usual, be stopped
-** upon receipt of a signal.)  From the tracer's perspective, the
-** tracee will appear to have been stopped by receipt of a SIG‐
-** TRAP.
-**
 ** PTRACE_CONT:
 ** Restart the stopped tracee process.
 */
@@ -191,40 +100,6 @@ static int	init_ptrace(pid_t child)
 	return (0);
 }
 
-static int	print_next_syscall(pid_t child, unsigned char bin_elf_class, \
-				t_ft_strace_opts *opts, t_ft_strace_syscall *table, \
-				struct user_regs_struct *pre_user_regs, struct user_regs_struct *post_user_regs)
-{
-	int		status;
-	int		buffer_param_index;
-
-	(void)opts;
-	if (cont_process(child, &status, pre_user_regs))
-		return (1);
-	buffer_param_index = ft_int_index(table[pre_user_regs->orig_rax].reg_types, 6, BUFFER);
-	// if (buffer_param_index != -1)
-		// dprintf(INFO_FD, "BUFFER_INDEX %d\n", buffer_param_index);
-	if (!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
-		0, (buffer_param_index == -1) ? (6) : (buffer_param_index)))
-		return (1);
-	if (cont_process(child, &status, post_user_regs))
-	{
-		dprintf(INFO_FD, ") = ?\n");
-		return (1);
-	}
-	if (buffer_param_index != -1)
-	{
-		// printf("BUFFER PARAM INDEX: %d\n", buffer_param_index);
-		if (!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
-			buffer_param_index, (6 - (buffer_param_index))))
-			return (1);
-	}
-	if (!print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, post_user_regs, table, \
-		0, 6))
-		return (1);
-	return (0);
-}
-
 static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid_t child)
 {
 	struct user_regs_struct			pre_user_regs;
@@ -232,7 +107,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	t_ft_strace_syscall				*table;
 	t_ft_strace_syscall_exec_info	*exec_infos;
 	size_t							table_size;
-
+	int								status;
 
 	if (bin_elf_class == ELFCLASS32)
 	{
@@ -256,7 +131,8 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
 	while ("42 and beyond")
 	{
-		if (print_next_syscall(child, bin_elf_class, opts, table, &pre_user_regs, &post_user_regs))
+		if (handle_next_syscall(child, bin_elf_class, &status, \
+			table, &pre_user_regs, &post_user_regs))
 			break ;
 		if (opts->c)
 			update_syscall_exec_infos(table, exec_infos, &post_user_regs);
@@ -266,6 +142,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 		show_calls_summary(table, table_size, exec_infos);
 		free(exec_infos);
 	}
+	handle_wait_status(child, status);
 	return (1);
 }
 

@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/18 16:42:35 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/18 20:38:04 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,10 @@ SRC_NAME =	main.c \
 			get_fmt_flags.c \
 			format_reg_value.c \
 			get_binary_architecture.c \
-			str_signo.c
+			str_signo.c \
+			allow_sigs.c \
+			block_sigs.c \
+			handle_next_syscall.c
 
 INCLUDES_NAME = ft_strace.h \
 				syscall_table_32.h \

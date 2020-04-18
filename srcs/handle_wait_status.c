@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 16:19:31 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 20:45:11 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,10 @@ static int	handle_stopped_status(pid_t child)
 ** L’option PTRACE_GETSIGINFO permet d’en connaˆıtre plus sur la
 ** raison de la notification
 **
+** waitpid macro int WSTOPSIG (int status):
+** If WIFSTOPPED is true of status, this macro returns
+** the signal number of the signal that caused the child process to stop.
+**
 ** https://stackoverflow.com/questions/5294870/exit-status-code-4479
 */
 
@@ -133,14 +137,12 @@ int		handle_wait_status(pid_t child, int status)
 	if (WIFEXITED(status))
 	{
 		dprintf(INFO_FD, "+++ exited with %d +++\n", WEXITSTATUS(status));
-		fflush(stdout);
 		exit(1);
 	}
 	if (WIFSIGNALED(status))
 	{
 		sig_fmt = str_signo(status);
-		dprintf(INFO_FD, "+++ Killed by SIG%s +++\n", sig_fmt);
-		fflush(stdout);
+		dprintf(INFO_FD, "+++ killed by SIG%s +++\n", sig_fmt);
 		exit(2);
 	}
 	if (WIFSTOPPED(status))
@@ -148,7 +150,6 @@ int		handle_wait_status(pid_t child, int status)
 		if (WSTOPSIG(status) == (SIGTRAP | 0x80))
 			return (0);
 		handle_stopped_status(child);
-		return (2);
 	}
 	return (1);
 }

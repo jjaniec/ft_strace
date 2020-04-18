@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 20:20:39 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 20:41:28 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,8 +103,8 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 	if (!regs_offset)
 		printed += dprintf(INFO_FD, "%s(", table[user_regs->orig_rax].name);
 	printed += dprintf(INFO_FD, (!regs_offset) ? ("%s") : (", %s"), ret);
-	if (regs_offset + regs_max_count == 6)
-		printed += dprintf(INFO_FD, ")");
+	// if (regs_offset + regs_max_count == 6)
+		// printed += dprintf(INFO_FD, ")");
 	free(ret);
 	return (printed);
 }
@@ -127,8 +127,8 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 		asprintf(&s, "-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
 	else
 		s = format_reg_value(process, table[user_regs->orig_rax].reg_ret_type, user_regs->rax);
-	printed = dprintf(INFO_FD, "%*s= %s\n", \
-		(total_printed > 40) ? (0) : (40 - total_printed), "", s);
+	printed = dprintf(INFO_FD, ")%*s= %s\n", \
+		(total_printed > 40) ? (0) : (40 - total_printed), " ", s);
 	free(s);
 	return (printed);
 }

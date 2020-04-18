@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 18:40:10 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/18 20:56:18 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,23 +145,32 @@ enum e_systypes	{
 ** https://nullprogram.com/blog/2018/06/23/
 */
 
+/*
+** Init tasks
+*/
+
+char			*resolve_path(char *cmd, char **environ);
+
+char			**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
+
+unsigned char	get_binary_architecture(const char *abspath);
+
+/*
+** Main loop
+*/
+
 int			ft_strace(t_ft_strace_opts *opts, char *exec_path, char **exec_args, char **exec_environ);
 
-char		*resolve_path(char *cmd, char **environ);
+int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
+				int *status, t_ft_strace_syscall *table, \
+				struct user_regs_struct *pre_user_regs, struct user_regs_struct *post_user_regs);
 
-char		**parse_opts(t_ft_strace_opts *opts, int ac, char **av);
 
-int				print_syscall_info(pid_t process, bool regs_type, \
-					unsigned char bin_elf_class, \
-					struct user_regs_struct *user_regs, \
-					t_ft_strace_syscall *table,
-					unsigned int regs_offset, unsigned int regs_max_count);
-
-// ft_strerror.c
-
-char		*ft_strerror(int errnum);
-
-char		*tostring_errnum(int errnum);
+int			print_syscall_info(pid_t process, bool regs_type, \
+				unsigned char bin_elf_class, \
+				struct user_regs_struct *user_regs, \
+				t_ft_strace_syscall *table,
+				unsigned int regs_offset, unsigned int regs_max_count);
 
 char		*format_reg_value(pid_t child, int type, unsigned long reg_value);
 
@@ -174,7 +183,21 @@ int			handle_wait_status(pid_t child, int status);
 int			show_calls_summary(t_ft_strace_syscall *table, size_t table_size, \
 				t_ft_strace_syscall_exec_info *exec_infos);
 
-unsigned char	get_binary_architecture(const char *abspath);
+/*
+** Errno
+*/
+
+char		*ft_strerror(int errnum);
+
+char		*tostring_errnum(int errnum);
+
+/*
+** Signals
+*/
+
+int			allow_sigs(void);
+
+int			block_sigs(void);
 
 char		*str_signo(int sig);
 
