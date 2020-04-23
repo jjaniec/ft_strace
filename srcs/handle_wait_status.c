@@ -6,11 +6,30 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 20:45:11 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/23 18:25:45 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
+
+extern	t_ft_strace_syscall				g_syscall_table_32[384];
+
+extern	t_ft_strace_syscall				g_syscall_table_64[329];
+
+extern	t_ft_strace_opts				*g_ft_strace_opts;
+
+extern	t_ft_strace_syscall_exec_info	***g_ft_strace_exec_infos;
+
+static int		handle_sig_exit(int exit_code)
+{
+	if (g_ft_strace_opts->c)
+		show_calls_summary(sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]), g_syscall_table_32, \
+			sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]), g_syscall_table_64, \
+			g_ft_strace_exec_infos);
+	if (exit_code == SIGSEGV)
+		dprintf(ERR_FD, "Segmentation fault\n");
+	exit(exit_code);
+}
 
 /*
 ** https://sites.uclouvain.be/SystInfo/usr/include/bits/siginfo.h.html
@@ -76,37 +95,42 @@ static int	handle_stopped_status(pid_t child)
 		return (0);
 	if (status_siginfo.si_signo == SIGCHLD)
 	{
-		dprintf(INFO_FD, \
-			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d, si_status=%d, si_utime=%ld, si_stime=%ld} ---\n", \
-			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
-			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
-			status_siginfo.si_pid, status_siginfo.si_uid, status_siginfo.si_status, \
-			status_siginfo.si_utime, status_siginfo.si_stime);
+		if (!g_ft_strace_opts->c)
+			dprintf(INFO_FD, \
+				"--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d, si_status=%d, si_utime=%ld, si_stime=%ld} ---\n", \
+				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
+				status_siginfo.si_pid, status_siginfo.si_uid, status_siginfo.si_status, \
+				status_siginfo.si_utime, status_siginfo.si_stime);
 	}
 	else if (status_siginfo.si_signo == SIGSEGV)
 	{
-		dprintf(INFO_FD, \
-			"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
-			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
-			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
-		dprintf(INFO_FD, "+++ killed by SIG%s +++\nSegmentation fault\n", str_signo(status_siginfo.si_signo));
-		exit(status_siginfo.si_signo);
+		if (!g_ft_strace_opts->c)
+		{
+			dprintf(INFO_FD, \
+				"--- SIG%s {si_signo=SIG%s, si_code=%s, si_addr=%p} ---\n", \
+				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), status_siginfo.si_addr);
+			dprintf(INFO_FD, "+++ killed by SIG%s +++\n", str_signo(status_siginfo.si_signo));
+		}
+		handle_sig_exit(status_siginfo.si_signo);
 	}
 	else if (status_siginfo.si_signo == SIGINT || \
 		status_siginfo.si_signo == SIGTSTP || \
 		status_siginfo.si_signo == SIGCONT)
 	{
-		dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s} ---\n", \
-			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
-			str_sicode(status_siginfo.si_signo, status_siginfo.si_code));
+		if (!g_ft_strace_opts->c)
+			dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s} ---\n", \
+				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+				str_sicode(status_siginfo.si_signo, status_siginfo.si_code));
 	}
 	else
 	{
-		// dprintf(STDERR_FILENO, "Sig code=%d\n", status_siginfo.si_signo);
-		dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d} ---\n", \
-			str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
-			str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
-			status_siginfo.si_pid, status_siginfo.si_uid);
+		if (!g_ft_strace_opts->c)
+			dprintf(INFO_FD, "--- SIG%s {si_signo=SIG%s, si_code=%s, si_pid=%d, si_uid=%d} ---\n", \
+				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
+				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
+				status_siginfo.si_pid, status_siginfo.si_uid);
 		// exit(status_siginfo.si_signo);
 	}
 	return (status_siginfo.si_signo);
@@ -136,14 +160,18 @@ int		handle_wait_status(pid_t child, int status)
 	(void)child;
 	if (WIFEXITED(status))
 	{
-		dprintf(INFO_FD, "+++ exited with %d +++\n", WEXITSTATUS(status));
-		exit(1);
+		if (!g_ft_strace_opts->c)
+			dprintf(INFO_FD, "+++ exited with %d +++\n", WEXITSTATUS(status));
+		handle_sig_exit(1);
 	}
 	if (WIFSIGNALED(status))
 	{
-		sig_fmt = str_signo(status);
-		dprintf(INFO_FD, "+++ killed by SIG%s +++\n", sig_fmt);
-		exit(2);
+		if (!g_ft_strace_opts->c)
+		{
+			sig_fmt = str_signo(status);
+			dprintf(INFO_FD, "+++ killed by SIG%s +++\n", sig_fmt);
+		}
+		handle_sig_exit(2);
 	}
 	if (WIFSTOPPED(status))
 	{

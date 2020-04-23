@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/23 15:25:42 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/23 18:21:00 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,7 @@ int			handle_wait_status(pid_t child, int status);
 
 int			show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 				size_t table64_size, t_ft_strace_syscall *table64, \
-				t_ft_strace_syscall_exec_info **exec_infos);
+				t_ft_strace_syscall_exec_info ***exec_infos);
 
 /*
 ** Errno

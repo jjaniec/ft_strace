@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 20:55:55 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/23 16:17:21 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,23 +70,27 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 	if (cont_process(child, status, pre_user_regs))
 		return (1);
 	buffer_param_index = ft_int_index(table[pre_user_regs->orig_rax].reg_types, 6, BUFFER);
-	if (!(printed = print_syscall_info(child, PRE_SYSCALL_REGS, \
+	if (!g_ft_strace_opts->c && \
+		!(printed = print_syscall_info(child, PRE_SYSCALL_REGS, \
 		bin_elf_class, pre_user_regs, table, 0, \
 		(buffer_param_index == -1) ? (6) : (buffer_param_index))))
 		return (1);
 	if (cont_process(child, status, post_user_regs))
 	{
-		dprintf(INFO_FD, ")%*s= ?\n", \
-			(printed > 40) ? (0) : (40 - printed), " ");
+		if (!g_ft_strace_opts->c)
+			dprintf(INFO_FD, ")%*s= ?\n", \
+				(printed > 40) ? (0) : (40 - printed), " ");
 		return (1);
 	}
 	if (buffer_param_index != -1)
 	{
-		if (!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
+		if (!g_ft_strace_opts->c && \
+			!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
 			buffer_param_index, (6 - (buffer_param_index))))
 			return (1);
 	}
-	if (!print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, post_user_regs, table, \
+	if (!g_ft_strace_opts->c && \
+		!print_syscall_info(child, POST_SYSCALL_REGS, bin_elf_class, post_user_regs, table, \
 		0, 6))
 		return (1);
 	return (0);
