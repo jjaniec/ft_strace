@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 20:41:28 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/23 13:06:10 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,12 +43,9 @@ static char		*cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 	char	*tmp;
 
 	ret = NULL;
-	// write(INFO_FD, "(", 1);
 	for (unsigned int i = 0; i < regs_max_count && syscall_reg_types[i] != UNDEF; i++)
 	{
 		s = NULL;
-		// if (i)
-			// write(INFO_FD, ", ", 2);
 		if (ft_int_index((int []) { \
 				FLAGS, MAP_PROT, O_FLAGS \
 			}, 3, syscall_reg_types[i]) != -1)
@@ -58,7 +55,7 @@ static char		*cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 		if (i)
 		{
 			tmp = ret;
-			asprintf(&ret, "%s, %s", ret, s);
+			asprintf(&ret, "%s%s", ret, s);
 			free(s);
 			free(tmp);
 		}
@@ -66,6 +63,13 @@ static char		*cycle_syscall_params(pid_t child, unsigned char bin_elf_class, \
 		{
 			asprintf(&ret, "%s", s);
 			free(s);
+		}
+		if (i + 1 < 6 && syscall_reg_types[i + 1] != UNDEF)
+		{
+			tmp = ret;
+			asprintf(&ret, "%s, ", ret);
+			// free(s);
+			free(tmp);
 		}
 	}
 	return (ret);
@@ -102,9 +106,7 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 			} + regs_offset, regs_max_count);
 	if (!regs_offset)
 		printed += dprintf(INFO_FD, "%s(", table[user_regs->orig_rax].name);
-	printed += dprintf(INFO_FD, (!regs_offset) ? ("%s") : (", %s"), ret);
-	// if (regs_offset + regs_max_count == 6)
-		// printed += dprintf(INFO_FD, ")");
+	printed += dprintf(INFO_FD, (!regs_offset) ? ("%s") : ("%s"), ret);
 	free(ret);
 	return (printed);
 }
@@ -121,7 +123,6 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 	int			printed;
 	char		*s;
 
-	// printf("|Total printed %d\n", total_printed);
 	if (table[user_regs->orig_rax].reg_ret_type == INT && \
 		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
 		asprintf(&s, "-1 %s (%s)", tostring_errnum(-user_regs->rax), ft_strerror(-user_regs->rax));
@@ -149,7 +150,6 @@ int				print_syscall_info(pid_t process, bool regs_type, \
 	printed = 0;
 	if (regs_type == PRE_SYSCALL_REGS)
 	{
-		// printf("Print %u params w/ offset %u\n", regs_max_count, regs_offset);
 		if (user_regs->orig_rax < ( sizeof(g_syscall_table_64) / sizeof(t_ft_strace_syscall) ))
 			printed = print_valid_pre_syscall(process, bin_elf_class, user_regs, \
 				table, regs_offset, regs_max_count);

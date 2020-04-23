@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 20:55:30 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/23 15:33:47 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,19 +105,19 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	struct user_regs_struct			pre_user_regs;
 	struct user_regs_struct			post_user_regs;
 	t_ft_strace_syscall				*table;
-	t_ft_strace_syscall_exec_info	*exec_infos;
-	size_t							table_size;
+	t_ft_strace_syscall_exec_info	**exec_infos;
+	// size_t							table_size;
 	int								status;
 
 	if (bin_elf_class == ELFCLASS32)
 	{
 		table = g_syscall_table_32;
-		table_size = sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]);
+		// table_size = sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]);
 	}
 	else if (bin_elf_class == ELFCLASS64)
 	{
 		table = g_syscall_table_64;
-		table_size = sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]);
+		// table_size = sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]);
 	}
 	else
 		exit(EXIT_FAILURE);
@@ -125,23 +125,32 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	init_ptrace(child);
 	if (opts->c)
 	{
-		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * table_size);
-		ft_memset(exec_infos, 0, sizeof(t_ft_strace_syscall_exec_info) * table_size);
+		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info *) * 2);
+		exec_infos[0] = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]));
+		exec_infos[1] = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]));
+		ft_memset(exec_infos[0], 0, sizeof(t_ft_strace_syscall_exec_info) * sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]));
+		ft_memset(exec_infos[1], 0, sizeof(t_ft_strace_syscall_exec_info) * sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]));
 	}
 	dprintf(OK_FD, OK_PREFIX "Child pid: %d\n", child);
-	while ("42 and beyond")
+	if (!handle_next_syscall(child, ELFCLASS64, &status, g_syscall_table_64, &pre_user_regs, &post_user_regs))
 	{
-		if (handle_next_syscall(child, bin_elf_class, &status, \
-			table, &pre_user_regs, &post_user_regs))
-			break ;
+		if (bin_elf_class == ELFCLASS32)
+		dprintf(INFO_FD, "ft_strace: [ Process PID=%d runs in 32 bit mode. ]\n", child);
 		if (opts->c)
-			update_syscall_exec_infos(table, exec_infos, &post_user_regs);
+			update_syscall_exec_infos(g_syscall_table_64, exec_infos, &post_user_regs);
+		while ("42 and beyond")
+		{
+			if (handle_next_syscall(child, bin_elf_class, &status, \
+				table, &pre_user_regs, &post_user_regs))
+				break ;
+			if (opts->c)
+				update_syscall_exec_infos(table, exec_infos, &post_user_regs);
+		}
 	}
-	if (opts->c)
-	{
-		show_calls_summary(table, table_size, exec_infos);
-		free(exec_infos);
-	}
+	// if (opts->c)
+		// show_calls_summary(g_syscall_table_32, sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]), \
+			// g_syscall_table_64, sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]), \
+			// exec_infos);
 	handle_wait_status(child, status);
 	return (1);
 }
