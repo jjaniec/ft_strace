@@ -6,13 +6,15 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/23 16:17:21 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/23 21:04:56 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <ft_strace.h>
 
-extern t_ft_strace_opts		*g_ft_strace_opts;
+extern t_ft_strace_opts					*g_ft_strace_opts;
+
+extern t_ft_strace_syscall_exec_info	***g_ft_strace_exec_infos;
 
 /*
 ** Read user section to gather syscall numbers & parameters
@@ -60,13 +62,43 @@ static int	cont_process(pid_t process, int *status, struct user_regs_struct *use
 	return (0);
 }
 
+static void	timeval_add(struct timeval *r, struct timeval *tv1, struct timeval *tv2)
+{
+	r->tv_sec = tv1->tv_sec + tv2->tv_sec;
+	r->tv_usec = tv1->tv_usec + tv2->tv_usec;
+	if (r->tv_usec >= 1000000)
+	{
+		r->tv_sec++;
+		r->tv_usec -= 1000000;
+	}
+}
+
+static void	timeval_sub(struct timeval *r, struct timeval *tv1, struct timeval *tv2)
+{
+	r->tv_sec = tv1->tv_sec - tv2->tv_sec;
+	r->tv_usec = tv1->tv_usec - tv2->tv_usec;
+	if (((long) r->tv_usec) < 0)
+	{
+		r->tv_sec--;
+		r->tv_usec += 1000000;
+	}
+}
+
 int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 				int *status, t_ft_strace_syscall *table, \
 				struct user_regs_struct *pre_user_regs, struct user_regs_struct *post_user_regs)
 {
-	int		buffer_param_index;
-	int		printed;
+	int					buffer_param_index;
+	int					printed;
+	struct timeval		syscall_time;
+	struct timeval		syscall_time_end;
 
+	if (g_ft_strace_opts->c)
+	{
+		ft_memset(&syscall_time, 0, sizeof(struct timeval));
+		ft_memset(&syscall_time_end, 0, sizeof(struct timeval));
+		gettimeofday(&syscall_time, NULL);
+	}
 	if (cont_process(child, status, pre_user_regs))
 		return (1);
 	buffer_param_index = ft_int_index(table[pre_user_regs->orig_rax].reg_types, 6, BUFFER);
@@ -81,6 +113,14 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 			dprintf(INFO_FD, ")%*s= ?\n", \
 				(printed > 40) ? (0) : (40 - printed), " ");
 		return (1);
+	}
+	if (g_ft_strace_opts->c)
+	{
+		gettimeofday(&syscall_time_end, NULL);
+		timeval_sub(&syscall_time, &syscall_time_end, &syscall_time);
+		timeval_add(&(*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS64][pre_user_regs->orig_rax].time, \
+			&(*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS64][pre_user_regs->orig_rax].time, \
+			&syscall_time);
 	}
 	if (buffer_param_index != -1)
 	{
