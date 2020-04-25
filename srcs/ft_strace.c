@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 15:16:38 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 17:53:20 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,6 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	struct user_regs_struct			post_user_regs;
 	t_ft_strace_syscall				*table;
 	t_ft_strace_syscall_exec_info	**exec_infos;
-	// size_t							table_size;
 	int								status;
 
 	if (bin_elf_class == ELFCLASS32)
@@ -125,7 +124,6 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 	if (opts->c)
 	{
 		exec_infos = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info *) * 2);
-		printf("%p exec_infos\n", exec_infos);
 		exec_infos[0] = ft_xmalloc(sizeof(t_ft_strace_syscall_exec_info) * sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]));
 		ft_memset(exec_infos[0], 0, sizeof(t_ft_strace_syscall_exec_info) * sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]));
 		if (bin_elf_class == ELFCLASS32)

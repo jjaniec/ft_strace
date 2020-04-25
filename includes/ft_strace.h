@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 16:18:27 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 16:44:17 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,9 @@ int			print_syscall_info(pid_t process, bool regs_type, \
 				t_ft_strace_syscall *table,
 				unsigned int regs_offset, unsigned int regs_max_count);
 
-char		*format_reg_value(pid_t child, int type, unsigned long reg_value);
+char		*format_reg_value(pid_t child, int type, \
+				unsigned long reg_value, unsigned char bin_elf_class, \
+				struct user_regs_struct *pre_user_regs);
 
 char		*get_fmt_flags(pid_t child, unsigned char bin_elf_class, \
 				unsigned long orig_rax, int type, \
