@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/23 21:04:56 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 16:17:23 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,17 +62,6 @@ static int	cont_process(pid_t process, int *status, struct user_regs_struct *use
 	return (0);
 }
 
-static void	timeval_add(struct timeval *r, struct timeval *tv1, struct timeval *tv2)
-{
-	r->tv_sec = tv1->tv_sec + tv2->tv_sec;
-	r->tv_usec = tv1->tv_usec + tv2->tv_usec;
-	if (r->tv_usec >= 1000000)
-	{
-		r->tv_sec++;
-		r->tv_usec -= 1000000;
-	}
-}
-
 static void	timeval_sub(struct timeval *r, struct timeval *tv1, struct timeval *tv2)
 {
 	r->tv_sec = tv1->tv_sec - tv2->tv_sec;
@@ -118,8 +107,10 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 	{
 		gettimeofday(&syscall_time_end, NULL);
 		timeval_sub(&syscall_time, &syscall_time_end, &syscall_time);
-		timeval_add(&(*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS64][pre_user_regs->orig_rax].time, \
-			&(*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS64][pre_user_regs->orig_rax].time, \
+		if (bin_elf_class == ELFCLASS64)
+		timeval_add( \
+			&((*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS32][pre_user_regs->orig_rax].time), \
+			&((*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS32][pre_user_regs->orig_rax].time), \
 			&syscall_time);
 	}
 	if (buffer_param_index != -1)

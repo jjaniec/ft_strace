@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 18:46:21 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/23 20:51:39 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 16:17:30 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,9 @@ int					show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 {
 	unsigned int	total_calls;
 	unsigned int	total_errors;
+	struct timeval	total_time;
 	unsigned int	table_index;
-	double			float_time;
+	double			syscall_float_time;
 	struct timeval	syscall_time_by_calls;
 
 	table_index = 0;
@@ -41,6 +42,10 @@ int					show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 	{
 		total_calls = 0;
 		total_errors = 0;
+		ft_memset(&total_time, 0, sizeof(total_time));
+		for (size_t i = 0; ((table_index == 0 && i < table64_size) || \
+			(table_index == 1 && i < table32_size)); i++)
+			timeval_add(&total_time, &total_time, &((*exec_infos)[table_index][i].time));
 		if (table_index == 1)
 			dprintf(INFO_FD, "System call usage summary for 32 bit mode:\n");
 		dprintf(INFO_FD, "%6s %11s %11s %9s %9s syscall\n", \
@@ -53,12 +58,12 @@ int					show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 			if ((*exec_infos)[table_index][i].calls != 0)
 			{
 				ft_memset(&syscall_time_by_calls, 0, sizeof(struct timeval));
-				float_time = timeval_float(&(*exec_infos)[table_index][i].time);
+				syscall_float_time = timeval_float(&(*exec_infos)[table_index][i].time);
 				timeval_div(&syscall_time_by_calls, \
 					&(*exec_infos)[table_index][i].time, (*exec_infos)[table_index][i].calls);
 				dprintf(INFO_FD, "%6.2f %11.6f %11lu %9u %9.0u %s\n", \
-					100 * float_time, \
-					float_time, \
+					((100.0 * syscall_float_time) != 0.0) ? ((100.0 * syscall_float_time) / timeval_float(&total_time)) : (100.0 * syscall_float_time), \
+					syscall_float_time, \
 					(long)(1000000 * syscall_time_by_calls.tv_sec + syscall_time_by_calls.tv_usec), \
 					(*exec_infos)[table_index][i].calls, \
 					(*exec_infos)[table_index][i].errors, \
@@ -68,8 +73,8 @@ int					show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 			}
 		}
 		dprintf(INFO_FD, "------ ----------- ----------- --------- --------- ----------------\n");
-		dprintf(INFO_FD, "100.00 %11.6d %11.0u %9u %9.0u total\n", \
-			0, 0, total_calls, total_errors);
+		dprintf(INFO_FD, "100.00%12.6f %11.0u %9u %9.0u total\n", \
+			timeval_float(&total_time), 0, total_calls, total_errors);
 		free((*exec_infos)[table_index]);
 		(*exec_infos)[table_index] = NULL;
 		table_index++;

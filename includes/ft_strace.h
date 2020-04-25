@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/23 21:05:32 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 16:18:27 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,9 +182,15 @@ char		*get_fmt_flags(pid_t child, unsigned char bin_elf_class, \
 
 int			handle_wait_status(pid_t child, int status);
 
+/*
+** -c opt
+*/
+
 int			show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 				size_t table64_size, t_ft_strace_syscall *table64, \
 				t_ft_strace_syscall_exec_info ***exec_infos);
+
+void		timeval_add(struct timeval *r, struct timeval *tv1, struct timeval *tv2);
 
 /*
 ** Errno

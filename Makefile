@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/04/18 20:38:04 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/04/25 16:17:16 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,8 @@ SRC_NAME =	main.c \
 			str_signo.c \
 			allow_sigs.c \
 			block_sigs.c \
-			handle_next_syscall.c
+			handle_next_syscall.c \
+			timeval_add.c
 
 INCLUDES_NAME = ft_strace.h \
 				syscall_table_32.h \

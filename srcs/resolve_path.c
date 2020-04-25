@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:32:51 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/17 19:23:56 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 16:11:53 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,25 +48,27 @@ char	*resolve_path(char *cmd, char **environ)
 	char			**path_dirs;
 	char			buffer[PATH_RES_BUFF_LEN];
 	unsigned int	path_len;
+	int				i;
 
 	if (is_path_valid(cmd))
 		return (ft_strdup(cmd));
 	path = get_path_var(environ);
 	path_dirs = split_path(path);
-	while (path_dirs && *path_dirs)
+	i = 0;
+	while (path_dirs && path_dirs[i])
 	{
-		path_len = ft_strlen(*path_dirs);
-		ft_strcpy(buffer, *path_dirs);
+		path_len = ft_strlen(path_dirs[i]);
+		ft_strcpy(buffer, path_dirs[i]);
 		buffer[path_len] = '/';
 		ft_strcpy(buffer + path_len + 1, cmd);
 		if (is_path_valid(buffer))
 		{
-			free(*path_dirs);
+			free(path_dirs[i]);
 			return (ft_strdup(buffer));
 		}
-		free(*path_dirs);
-		path_dirs++;
+		free(path_dirs[i]);
+		i++;
 	}
-	// free(path_dirs);
+	free(path_dirs);
 	return (NULL);
 }
