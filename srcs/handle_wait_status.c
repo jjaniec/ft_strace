@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/23 18:25:45 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/02 18:36:36 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,12 @@ extern	t_ft_strace_syscall_exec_info	***g_ft_strace_exec_infos;
 
 static int		handle_sig_exit(int exit_code)
 {
+	size_t		table32_size = 384;
+	size_t		table64_size = 314;
+
 	if (g_ft_strace_opts->c)
-		show_calls_summary(sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]), g_syscall_table_32, \
-			sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]), g_syscall_table_64, \
+		show_calls_summary(table32_size, g_syscall_table_32, \
+			table64_size, g_syscall_table_64, \
 			g_ft_strace_exec_infos);
 	if (exit_code == SIGSEGV)
 		dprintf(ERR_FD, "Segmentation fault\n");
@@ -131,7 +134,8 @@ static int	handle_stopped_status(pid_t child)
 				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
 				status_siginfo.si_pid, status_siginfo.si_uid);
-		// exit(status_siginfo.si_signo);
+		// if (status_siginfo.si_signo == SIGWINCH)
+			// print_syscall_sig(child, status, sys, sig);
 	}
 	return (status_siginfo.si_signo);
 }

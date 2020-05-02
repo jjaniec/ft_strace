@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 18:55:21 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 18:59:41 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,6 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 		printed += dprintf(INFO_FD, "%s(", table[user_regs->orig_rax].name);
 	if (table[user_regs->orig_rax].reg_types[0] == UNDEF)
 	{
-		// printf("%zu\n", user_regs->orig_rax);
 		if (*last_interrupted_syscall != ULONG_MAX && \
 			((bin_elf_class == ELFCLASS64 && user_regs->orig_rax == 219) || \
 			(bin_elf_class == ELFCLASS32 && user_regs->orig_rax == 0)))

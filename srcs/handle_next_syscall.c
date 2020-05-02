@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 16:17:23 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/02 17:46:35 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,6 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 	{
 		gettimeofday(&syscall_time_end, NULL);
 		timeval_sub(&syscall_time, &syscall_time_end, &syscall_time);
-		if (bin_elf_class == ELFCLASS64)
 		timeval_add( \
 			&((*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS32][pre_user_regs->orig_rax].time), \
 			&((*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS32][pre_user_regs->orig_rax].time), \

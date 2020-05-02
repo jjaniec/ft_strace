@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 16:44:17 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/04/25 19:39:27 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,11 @@ typedef struct		 s_ft_strace_flag_list {
 	unsigned int	size;
 }					t_ft_strace_flag_list;
 
-typedef struct s_ft_strace_syscall_exec_info {
-	struct timeval	time;
-	unsigned int	calls;
-	unsigned int	errors;
-}					t_ft_strace_syscall_exec_info;
+typedef struct 			s_ft_strace_syscall_exec_info {
+	struct timeval		time;
+	unsigned int		calls;
+	unsigned int		errors;
+}						t_ft_strace_syscall_exec_info;
 
 // Map prot flags values & format
 
