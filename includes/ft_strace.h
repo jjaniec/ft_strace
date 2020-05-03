@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 19:39:27 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 19:30:15 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,8 @@ char		*get_fmt_flags(pid_t child, unsigned char bin_elf_class, \
 				unsigned long orig_rax, int type, \
 				unsigned long reg_value);
 
-int			handle_wait_status(pid_t child, int status);
+int			handle_wait_status(pid_t child, unsigned char bin_elf_class, \
+				int status);
 
 /*
 ** -c opt

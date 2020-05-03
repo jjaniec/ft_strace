@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/02 18:36:09 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 19:28:53 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 		show_calls_summary(sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]), g_syscall_table_32, \
 			sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]), g_syscall_table_64, \
 			&exec_infos);
-	handle_wait_status(child, status);
+	handle_wait_status(child, bin_elf_class, status);
 	return (1);
 }
 

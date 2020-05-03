@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/02 17:46:35 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 19:30:52 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ extern t_ft_strace_syscall_exec_info	***g_ft_strace_exec_infos;
 ** TRAP.
 */
 
-static int	cont_process(pid_t process, int *status, struct user_regs_struct *user_regs)
+static int	cont_process(pid_t process, unsigned char bin_elf_class, \
+				int *status, struct user_regs_struct *user_regs)
 {
 	while (1)
 	{
@@ -51,7 +52,7 @@ static int	cont_process(pid_t process, int *status, struct user_regs_struct *use
 		if (WIFEXITED(*status) || WIFSIGNALED(*status))
 			return (1);
 		block_sigs();
-		if (handle_wait_status(process, *status) == 0)
+		if (handle_wait_status(process, bin_elf_class, *status) == 0)
 			break ;
 	}
 	if (ptrace(PTRACE_GETREGS, process, 0, user_regs) < 0)
@@ -88,7 +89,7 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 		ft_memset(&syscall_time_end, 0, sizeof(struct timeval));
 		gettimeofday(&syscall_time, NULL);
 	}
-	if (cont_process(child, status, pre_user_regs))
+	if (cont_process(child, bin_elf_class, status, pre_user_regs))
 		return (1);
 	buffer_param_index = ft_int_index(table[pre_user_regs->orig_rax].reg_types, 6, BUFFER);
 	if (!g_ft_strace_opts->c && \
@@ -96,7 +97,7 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 		bin_elf_class, pre_user_regs, table, 0, \
 		(buffer_param_index == -1) ? (6) : (buffer_param_index))))
 		return (1);
-	if (cont_process(child, status, post_user_regs))
+	if (cont_process(child, bin_elf_class, status, post_user_regs))
 	{
 		if (!g_ft_strace_opts->c)
 			dprintf(INFO_FD, ")%*s= ?\n", \

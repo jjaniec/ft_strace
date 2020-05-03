@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/02 18:36:36 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 19:27:57 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,11 +84,61 @@ static char 	*str_sicode(int si_signo, int si_code)
 	return ("UNKNOWN");
 }
 
+
+static void	cont_syscall_sig(pid_t child, int *status, void *ptrace_syscall_data)
+{
+	if ((ptrace(PTRACE_SYSCALL, child, NULL, ptrace_syscall_data)) < 0)
+	{
+		perror("ptrace");
+		exit(EXIT_FAILURE);
+	}
+	allow_sigs();
+	if ((waitpid(child, status, 0)) < 0)
+	{
+		perror("waitpid");
+		exit(EXIT_FAILURE);
+	}
+	block_sigs();
+}
+
+static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
+				int *status, siginfo_t *status_siginfo)
+{
+	struct user_regs_struct	user_regs;
+	t_ft_strace_syscall		*table;
+	size_t					table_size;
+	int						printed;
+
+	table = (bin_elf_class == ELFCLASS64) ? \
+		(g_syscall_table_64) : (g_syscall_table_32);
+	table_size = (bin_elf_class == ELFCLASS64) ? \
+		(sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0])) : \
+		(sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]));
+	while (1)
+	{
+		cont_syscall_sig(child, status, (void *)status_siginfo->si_signo);
+		ptrace(PTRACE_GETREGS, child, NULL, &user_regs);
+		if (user_regs.orig_rax > table_size)
+			break ;
+		if (!g_ft_strace_opts->c && \
+				!(printed = print_syscall_info(child, PRE_SYSCALL_REGS, \
+				bin_elf_class, &user_regs, table, 0, 6)))
+				return (1);
+		cont_syscall_sig(child, status, (void *)status_siginfo->si_signo);
+		ptrace(PTRACE_GETREGS, child, NULL, &user_regs);
+		if (!g_ft_strace_opts->c && \
+				!(printed += print_syscall_info(child, POST_SYSCALL_REGS, \
+				bin_elf_class, &user_regs, table, 0, 6)))
+				return (1);
+	}
+	return (0);
+}
+
 /*
 ** siginfo_t struct refrence: https://docs.huihoo.com/doxygen/linux/kernel/3.7/structsiginfo.html
 */
 
-static int	handle_stopped_status(pid_t child)
+static int	handle_stopped_status(pid_t child, unsigned char bin_elf_class, int *status)
 {
 	siginfo_t		status_siginfo;
 
@@ -134,8 +184,8 @@ static int	handle_stopped_status(pid_t child)
 				str_signo(status_siginfo.si_signo), str_signo(status_siginfo.si_signo), \
 				str_sicode(status_siginfo.si_signo, status_siginfo.si_code), \
 				status_siginfo.si_pid, status_siginfo.si_uid);
-		// if (status_siginfo.si_signo == SIGWINCH)
-			// print_syscall_sig(child, status, sys, sig);
+		if (status_siginfo.si_signo == SIGWINCH)
+			handle_syscall_sig(child, bin_elf_class, status, &status_siginfo);
 	}
 	return (status_siginfo.si_signo);
 }
@@ -157,7 +207,7 @@ static int	handle_stopped_status(pid_t child)
 ** https://stackoverflow.com/questions/5294870/exit-status-code-4479
 */
 
-int		handle_wait_status(pid_t child, int status)
+int		handle_wait_status(pid_t child, unsigned char bin_elf_class, int status)
 {
 	char			*sig_fmt;
 
@@ -181,7 +231,7 @@ int		handle_wait_status(pid_t child, int status)
 	{
 		if (WSTOPSIG(status) == (SIGTRAP | 0x80))
 			return (0);
-		handle_stopped_status(child);
+		handle_stopped_status(child, bin_elf_class, &status);
 	}
 	return (1);
 }
