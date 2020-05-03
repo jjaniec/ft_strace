@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 17:52:52 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 23:50:59 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,19 @@ static char		*get_fmt_string_tab(pid_t child, unsigned long reg_value)
 	return (fmt);
 }
 
+static char		*get_vars(pid_t child, unsigned long reg_value)
+{
+	unsigned int		i;
+	unsigned long		data;
+	char				*fmt;
+
+	i = 0;
+	while (ptrace(PTRACE_PEEKDATA, child, reg_value + (i * sizeof(char *))))
+		i++;
+	asprintf(&fmt, "%p /* %d vars */", reg_value, i);
+	return (fmt);
+}
+
 /*
 ** Choose the right method to print a register according to the syscall table
 */
@@ -201,6 +214,8 @@ char			*format_reg_value(pid_t child, int type, \
 	}
 	else if (type == STR_TAB)
 		ret = get_fmt_string_tab(child, reg_value);
+	else if (type == VARS)
+		ret = get_vars(child, reg_value);
 	else if (type == SIGNO)
 		asprintf(&ret, "SIG%s", str_signo(reg_value));
 	else

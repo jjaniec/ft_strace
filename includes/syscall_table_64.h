@@ -57,7 +57,7 @@
 { "clone", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 { "fork", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
 { "vfork", {UNDEF, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, INT },
-{ "execve", {STR, STR_TAB, STR_TAB, UNDEF, UNDEF, UNDEF}, INT },
+{ "execve", {STR, STR_TAB, VARS, UNDEF, UNDEF, UNDEF}, INT },
 { "exit", {INT, UNDEF, UNDEF, UNDEF, UNDEF, UNDEF}, VOID },
 { "wait4", {INT, PTR, INT, PTR, UNDEF, UNDEF}, INT },
 { "kill", {INT, INT, UNDEF, UNDEF, UNDEF, UNDEF}, INT },

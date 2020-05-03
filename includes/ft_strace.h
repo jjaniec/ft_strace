@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 20:14:41 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 20:56:12 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,8 @@ enum e_systypes	{
 	MAP,
 	SIGNO,
 	O_FLAGS,
-	BUFFER
+	BUFFER,
+	VARS
 };
 
 /*
