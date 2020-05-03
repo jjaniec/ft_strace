@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 19:28:53 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 20:14:11 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,28 +45,6 @@ static void	child_process_tasks(char *exec_path, char **exec_args, char **exec_e
 	if (execve(exec_path, exec_args, exec_environ) == -1)
 		handle_execve_err();
 }
-
-/*
-** Update call & error count of last syscall
-*/
-
-static int		update_syscall_exec_infos(unsigned char bin_elf_class,
-					t_ft_strace_syscall *table32, t_ft_strace_syscall *table64, \
-					t_ft_strace_syscall_exec_info **exec_infos, \
-					struct user_regs_struct *post_user_regs)
-{
-	t_ft_strace_syscall	*table;
-
-	table = (bin_elf_class == ELFCLASS32) ? (table64) : (table32);
-	exec_infos[bin_elf_class == ELFCLASS32][post_user_regs->orig_rax].calls++;
-	if (table[post_user_regs->orig_rax].reg_ret_type == INT && \
-		(-4095 <= (int)post_user_regs->rax && (int)post_user_regs->rax <= -1))
-	{
-		exec_infos[bin_elf_class == ELFCLASS32][post_user_regs->orig_rax].errors++;
-	}
-	return (0);
-}
-
 
 /*
 ** PTRACE_SEIZE:

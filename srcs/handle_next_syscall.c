@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 19:30:52 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 19:36:15 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,17 +61,6 @@ static int	cont_process(pid_t process, unsigned char bin_elf_class, \
 		exit(EXIT_FAILURE);
 	}
 	return (0);
-}
-
-static void	timeval_sub(struct timeval *r, struct timeval *tv1, struct timeval *tv2)
-{
-	r->tv_sec = tv1->tv_sec - tv2->tv_sec;
-	r->tv_usec = tv1->tv_usec - tv2->tv_usec;
-	if (((long) r->tv_usec) < 0)
-	{
-		r->tv_sec--;
-		r->tv_usec += 1000000;
-	}
 }
 
 int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \

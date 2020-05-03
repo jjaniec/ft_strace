@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 19:27:57 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 20:39:14 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,9 @@ static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
 	t_ft_strace_syscall		*table;
 	size_t					table_size;
 	int						printed;
+	struct timeval			syscall_time;
+	struct timeval			syscall_time_end;
+	unsigned long long		orig_rax;
 
 	table = (bin_elf_class == ELFCLASS64) ? \
 		(g_syscall_table_64) : (g_syscall_table_32);
@@ -116,15 +119,34 @@ static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
 		(sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]));
 	while (1)
 	{
+		if (g_ft_strace_opts->c)
+		{
+			ft_memset(&syscall_time, 0, sizeof(struct timeval));
+			ft_memset(&syscall_time_end, 0, sizeof(struct timeval));
+			gettimeofday(&syscall_time, NULL);
+		}
 		cont_syscall_sig(child, status, (void *)status_siginfo->si_signo);
 		ptrace(PTRACE_GETREGS, child, NULL, &user_regs);
-		if (user_regs.orig_rax > table_size)
+		orig_rax = user_regs.orig_rax;
+		if (orig_rax > table_size)
 			break ;
 		if (!g_ft_strace_opts->c && \
-				!(printed = print_syscall_info(child, PRE_SYSCALL_REGS, \
-				bin_elf_class, &user_regs, table, 0, 6)))
-				return (1);
+			!(printed = print_syscall_info(child, PRE_SYSCALL_REGS, \
+			bin_elf_class, &user_regs, table, 0, 6)))
+			return (1);
 		cont_syscall_sig(child, status, (void *)status_siginfo->si_signo);
+		if (g_ft_strace_opts->c)
+		{
+			gettimeofday(&syscall_time_end, NULL);
+			timeval_sub(&syscall_time, &syscall_time_end, &syscall_time);
+			timeval_add( \
+				&((*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS32][orig_rax].time), \
+				&((*g_ft_strace_exec_infos)[bin_elf_class == ELFCLASS32][orig_rax].time), \
+				&syscall_time);
+		}
+		if (g_ft_strace_opts->c)
+			update_syscall_exec_infos(bin_elf_class, g_syscall_table_32, g_syscall_table_64, \
+				*g_ft_strace_exec_infos, &user_regs);
 		ptrace(PTRACE_GETREGS, child, NULL, &user_regs);
 		if (!g_ft_strace_opts->c && \
 				!(printed += print_syscall_info(child, POST_SYSCALL_REGS, \

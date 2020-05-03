@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 19:30:15 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/03 20:14:41 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,6 @@ typedef struct 			s_ft_strace_syscall_exec_info {
 	"O_TRUNC", "O_EXCL", "O_CLOEXEC" \
 }
 
-
 // Syscall parameters / returns types
 
 enum e_systypes	{
@@ -189,11 +188,19 @@ int			handle_wait_status(pid_t child, unsigned char bin_elf_class, \
 ** -c opt
 */
 
+int			update_syscall_exec_infos(unsigned char bin_elf_class,
+				t_ft_strace_syscall *table32, t_ft_strace_syscall *table64, \
+				t_ft_strace_syscall_exec_info **exec_infos, \
+				struct user_regs_struct *post_user_regs);
+
 int			show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 				size_t table64_size, t_ft_strace_syscall *table64, \
 				t_ft_strace_syscall_exec_info ***exec_infos);
 
 void		timeval_add(struct timeval *r, struct timeval *tv1, struct timeval *tv2);
+
+void		timeval_sub(struct timeval *r, \
+				struct timeval *tv1, struct timeval *tv2);
 
 /*
 ** Errno
