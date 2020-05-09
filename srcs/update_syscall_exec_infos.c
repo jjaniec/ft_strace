@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/03 20:14:21 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 20:40:32 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 21:02:24 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ int			update_syscall_exec_infos(unsigned char bin_elf_class,
 	if ((bin_elf_class == ELFCLASS64 && post_user_regs->orig_rax == 15) || \
 		(bin_elf_class == ELFCLASS32 && post_user_regs->orig_rax == 119))
 		return (0);
-	if (table[post_user_regs->orig_rax].reg_ret_type == INT && \
-		(-4095 <= (int)post_user_regs->rax && (int)post_user_regs->rax <= -1))
+	if ((long long int)post_user_regs->rax < 0 && \
+		(long long int)post_user_regs->rax >= -4095)
 	{
 		exec_infos[bin_elf_class == ELFCLASS32][post_user_regs->orig_rax].errors++;
 	}

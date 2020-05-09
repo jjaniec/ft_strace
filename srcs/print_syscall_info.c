@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/25 18:59:41 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 21:02:33 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,8 +137,8 @@ static int		print_valid_post_syscall(pid_t process, struct user_regs_struct *use
 	int			printed;
 	char		*s;
 
-	if (table[user_regs->orig_rax].reg_ret_type == INT && \
-		(-4095 <= (int)user_regs->rax && (int)user_regs->rax <= -1))
+	if ((long long int)user_regs->rax < 0 && \
+		(long long int)user_regs->rax >= -4095)
 	{
 		if (-user_regs->rax > 500)
 		{

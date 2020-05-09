@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 20:39:14 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 20:06:17 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,17 @@ extern	t_ft_strace_syscall_exec_info	***g_ft_strace_exec_infos;
 
 static int		handle_sig_exit(int exit_code)
 {
-	size_t		table32_size = 384;
-	size_t		table64_size = 314;
+	size_t		table32_size = 384; // sizeof(g_syscall_table_32) / sizeof(g_syscall_table_32[0]);
+	size_t		table64_size = 314; //sizeof(g_syscall_table_64) / sizeof(g_syscall_table_64[0]);
 
 	if (g_ft_strace_opts->c)
 		show_calls_summary(table32_size, g_syscall_table_32, \
 			table64_size, g_syscall_table_64, \
 			g_ft_strace_exec_infos);
+	fflush(stdout);
+	fflush(stderr);
 	if (exit_code == SIGSEGV)
-		dprintf(ERR_FD, "Segmentation fault\n");
+		raise(SIGSEGV);
 	exit(exit_code);
 }
 
@@ -238,7 +240,7 @@ int		handle_wait_status(pid_t child, unsigned char bin_elf_class, int status)
 	{
 		if (!g_ft_strace_opts->c)
 			dprintf(INFO_FD, "+++ exited with %d +++\n", WEXITSTATUS(status));
-		handle_sig_exit(1);
+		handle_sig_exit(0);
 	}
 	if (WIFSIGNALED(status))
 	{
@@ -247,7 +249,7 @@ int		handle_wait_status(pid_t child, unsigned char bin_elf_class, int status)
 			sig_fmt = str_signo(status);
 			dprintf(INFO_FD, "+++ killed by SIG%s +++\n", sig_fmt);
 		}
-		handle_sig_exit(2);
+		handle_sig_exit(status);
 	}
 	if (WIFSTOPPED(status))
 	{

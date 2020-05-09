@@ -92,7 +92,7 @@ fclean: clean
 	@rm -f $(NAME)
 
 tests_exec:
-	for i in tests/*; do \
+	for i in tests/*.c; do \
 		gcc -pthread -m32 -o $$i.32.out $$i; \
 		gcc -pthread -m64 -o $$i.64.out $$i; \
 	done;

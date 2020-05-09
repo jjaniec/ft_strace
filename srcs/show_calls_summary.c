@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 18:46:21 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/02 18:34:11 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 19:37:01 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,8 @@ static void				print_syscall_line(t_ft_strace_syscall *syscall, \
 	struct timeval	syscall_time_by_calls;
 	double			syscall_float_time;
 
+	if (!syscall)
+		return ;
 	ft_memset(&syscall_time_by_calls, 0, sizeof(struct timeval));
 	syscall_float_time = timeval_float(&(syscall_infos->time));
 	timeval_div(&syscall_time_by_calls, &(syscall_infos->time), (syscall_infos->calls));

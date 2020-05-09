@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 23:50:59 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 21:17:15 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,10 @@ static char		*get_string_from_addr(pid_t child, unsigned long reg_value, \
 		errno = 0;
 		tmp = ptrace(PTRACE_PEEKDATA, child, reg_value + read);
 		if (errno)
+		{
+			free(buf);
 			return (NULL);
+		}
 		ft_memcpy(buf + read, &tmp, sizeof(tmp));
 		read += sizeof(tmp);
 		if ((!use_string_len && ft_memchr(&tmp, 0, sizeof(tmp))) || \
@@ -72,7 +75,7 @@ static char		*escape_string(char *str, bool use_string_len, size_t string_len)
 
 	i = 0;
 	orig_string_index = 0;
-	new_str = ft_xmalloc(((use_string_len) ? (string_len) : (ft_strlen(str)) * 4 + 1) * \
+	new_str = ft_xmalloc((((use_string_len) ? (string_len) : (ft_strlen(str)) * 4) + 1) * \
 		sizeof(char));
 	while (str && orig_string_index < 33 && ((use_string_len && (size_t)i < string_len) || \
 		(!use_string_len && str[orig_string_index])))
@@ -108,10 +111,13 @@ static char		*format_string(char **str, bool use_string_len, size_t string_len)
 	char	*tmp;
 
 	if (!*str)
-		return (ft_strdup("NULL"));
-	tmp = escape_string(*str, use_string_len, string_len);
-	free(*str);
-	*str = tmp;
+		*str = ft_strdup("NULL");
+	else
+	{
+		tmp = escape_string(*str, use_string_len, string_len);
+		free(*str);
+		*str = tmp;
+	}
 	return (0);
 }
 
@@ -121,8 +127,7 @@ static char		*get_fmt_string(pid_t child, unsigned long reg_value, \
 	char		*str;
 
 	str = get_string_from_addr(child, reg_value, use_string_len, string_len);
-	if (format_string(&str, use_string_len, string_len))
-		return (NULL);
+	format_string(&str, use_string_len, string_len);
 	return (str);
 }
 
@@ -192,7 +197,7 @@ char			*format_reg_value(pid_t child, int type, \
 
 	ret = NULL;
 	if (type == UNDEF)
-		return (0);
+		return (ret);
 	if ((fmt_index = ft_int_index(printf_fmt_types, (sizeof(printf_fmt_types) / sizeof(int)), type)) != -1)
 		asprintf(&ret, printf_fmt_types_str[fmt_index], reg_value);
 	else if (type == PTR || type == STRUCT)
@@ -210,7 +215,7 @@ char			*format_reg_value(pid_t child, int type, \
 		// read
 		if ((bin_elf_class == ELFCLASS64 && pre_user_regs->orig_rax == 0) || \
 			(bin_elf_class == ELFCLASS32 && pre_user_regs->orig_rax == 3))
-			ret = get_fmt_string(child, reg_value, true, (size_t)(pre_user_regs->rdx));
+			ret = get_fmt_string(child, reg_value, true, (size_t)(pre_user_regs->rax));
 	}
 	else if (type == STR_TAB)
 		ret = get_fmt_string_tab(child, reg_value);

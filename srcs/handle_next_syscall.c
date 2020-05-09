@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/18 20:22:46 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 19:36:15 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/07 20:31:18 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ int			handle_next_syscall(pid_t child, unsigned char bin_elf_class, \
 	}
 	if (buffer_param_index != -1)
 	{
+		pre_user_regs->rax = post_user_regs->rax;
 		if (!g_ft_strace_opts->c && \
 			!print_syscall_info(child, PRE_SYSCALL_REGS, bin_elf_class, pre_user_regs, table, \
 			buffer_param_index, (6 - (buffer_param_index))))
