@@ -6,7 +6,7 @@
 #    By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/03/27 18:10:31 by jjaniec           #+#    #+#              #
-#    Updated: 2020/05/03 20:14:51 by jjaniec          ###   ########.fr        #
+#    Updated: 2020/05/09 22:47:58 by jjaniec          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -90,12 +90,6 @@ clean:
 fclean: clean
 	@make fclean -C $(FT_PRINTF_DIR)
 	@rm -f $(NAME)
-
-tests_exec:
-	for i in tests/*.c; do \
-		gcc -pthread -m32 -o $$i.32.out $$i; \
-		gcc -pthread -m64 -o $$i.64.out $$i; \
-	done;
 
 re: fclean all
 
