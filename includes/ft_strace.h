@@ -6,12 +6,17 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:47:30 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/03 20:56:12 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 22:23:17 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_STRACE_H
 # define FT_STRACE_H
+
+// asprintf
+# ifndef _GNU_SOURCE
+# define _GNU_SOURCE 1
+# endif
 
 # include <ft_printf.h>
 
@@ -30,8 +35,6 @@
 # include <elf.h>
 # include <fcntl.h>
 # include <sys/time.h>
-
-
 
 // Buffer len used for path resolution of executables passed as arguments
 # define PATH_RES_BUFF_LEN	1024
@@ -189,8 +192,7 @@ int			handle_wait_status(pid_t child, unsigned char bin_elf_class, \
 ** -c opt
 */
 
-int			update_syscall_exec_infos(unsigned char bin_elf_class,
-				t_ft_strace_syscall *table32, t_ft_strace_syscall *table64, \
+int			update_syscall_exec_infos(unsigned char bin_elf_class, \
 				t_ft_strace_syscall_exec_info **exec_infos, \
 				struct user_regs_struct *post_user_regs);
 

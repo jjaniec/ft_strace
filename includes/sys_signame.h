@@ -11,9 +11,9 @@
 [ 5] = "TRAP", /* 5 */
 #endif
 [ 6] = "ABRT", /* 6 */
-#ifdef SIGIOT
-[ 6] = "IOT", /* 6, same as SIGABRT */
-#endif
+// #ifdef SIGIOT
+// [ 6] = "IOT", /* 6, same as SIGABRT */
+// #endif
 #ifdef SIGEMT
 [ 7] = "EMT", /* 7 (mips,alpha,sparc*) */
 #endif
@@ -32,10 +32,10 @@
 [16] = "STKFLT", /* 16 (arm,i386,m68k,ppc) */
 #endif
 [17] = "CHLD", /* 17 (arm,i386,m68k,ppc), 20 (alpha,sparc*), 18 (mips) */
-#ifdef SIGCLD
-[18] = "CLD", /* same as SIGCHLD (mips) */
-#endif
 [18] = "CONT", /* 18 (arm,i386,m68k,ppc), 19 (alpha,sparc*), 25 (mips) */
+// #ifdef SIGCLD
+// [18] = "CLD", /* same as SIGCHLD (mips) */
+// #endif
 [19] = "STOP", /* 19 (arm,i386,m68k,ppc), 17 (alpha,sparc*), 23 (mips) */
 [20] = "TSTP", /* 20 (arm,i386,m68k,ppc), 18 (alpha,sparc*), 24 (mips) */
 [21] = "TTIN", /* 21 (arm,i386,m68k,ppc,alpha,sparc*), 26 (mips) */
@@ -70,9 +70,9 @@
 #ifdef SIGLOST
 [29] = "LOST", /* 29 (arm,i386,m68k,ppc,sparc*) */
 #endif
-#ifdef SIGPWR
-[30] = "PWR", /* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
-#endif
+// #ifdef SIGPWR
+// [30] = "PWR", /* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
+// #endif
 #ifdef SIGUNUSED
 [31] = "UNUSED", /* 31 (arm,i386,m68k,ppc) */
 #endif

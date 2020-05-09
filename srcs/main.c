@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:07:13 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/07 20:17:45 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 22:31:29 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,7 @@
 
 static void		show_usage(void)
 {
-	write(INFO_FD, INFO_PREFIX "Usage: ./ft_ptrace [-c syscall_count] -- binary arg1 arg2 arg3 ...\n", \
-		ft_strlen(INFO_PREFIX) + 67);
+	dprintf(INFO_FD, INFO_PREFIX "Usage: ./ft_ptrace [-c] -- binary arg1 arg2 arg3 ...\n");
 }
 
 int		main(int ac, char **av, char **environ)

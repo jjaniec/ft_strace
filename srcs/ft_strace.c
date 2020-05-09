@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/28 16:08:56 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/09 17:55:31 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 22:23:56 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,16 +119,14 @@ static int	handle_child(unsigned char bin_elf_class, t_ft_strace_opts *opts, pid
 		if (bin_elf_class == ELFCLASS32)
 			dprintf(INFO_FD, "ft_strace: [ Process PID=%d runs in 32 bit mode. ]\n", child);
 		if (opts->c)
-			update_syscall_exec_infos(ELFCLASS64, g_syscall_table_32, g_syscall_table_64, \
-				exec_infos, &post_user_regs);
+			update_syscall_exec_infos(ELFCLASS64, exec_infos, &post_user_regs);
 		while ("42 and beyond")
 		{
 			if (handle_next_syscall(child, bin_elf_class, &status, \
 				table, &pre_user_regs, &post_user_regs))
 				break ;
 			if (opts->c)
-				update_syscall_exec_infos(bin_elf_class, g_syscall_table_32, g_syscall_table_64, \
-					exec_infos, &post_user_regs);
+				update_syscall_exec_infos(bin_elf_class, exec_infos, &post_user_regs);
 		}
 	}
 	if (opts->c && *g_ft_strace_exec_infos)

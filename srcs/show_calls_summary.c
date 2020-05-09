@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 18:46:21 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/09 19:37:01 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 21:56:56 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static int			*get_sorted_index(t_ft_strace_syscall *table, \
 
 	i = 1;
 	sorted_index = ft_range(0, (int)table_size);
-	while (table && i < table_size)
+	while (table && i < (int)table_size)
 	{
 		cmpi = i;
 		while (cmpi > 0) {
@@ -101,7 +101,7 @@ int						show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 	struct timeval	total_time;
 	unsigned int	table_index;
 	int				*sorted_index;
-	int				i;
+	size_t			i;
 
 	table_index = 0;
 	while (table_index <= 1 && exec_infos && *exec_infos && (*exec_infos)[table_index])
@@ -109,8 +109,8 @@ int						show_calls_summary(size_t table32_size, t_ft_strace_syscall *table32, \
 		total_calls = 0;
 		total_errors = 0;
 		ft_memset(&total_time, 0, sizeof(total_time));
-		for (size_t i = 0; ((table_index == 0 && i < (int)table64_size) || \
-			(table_index == 1 && i < (int)table32_size)); i++)
+		for (i = 0; ((table_index == 0 && i < table64_size) || \
+			(table_index == 1 && i < table32_size)); i++)
 			timeval_add(&total_time, &total_time, &((*exec_infos)[table_index][i].time));
 		if (table_index == 1)
 		{

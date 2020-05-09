@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 15:24:55 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/04/18 17:50:10 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 22:04:21 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static char	*fmt_flag_list(pid_t child, unsigned long reg_value, \
 	s = NULL;
 	for (unsigned int i = 0; i < flag_list->size; i++)
 	{
-		if (reg_value & flag_list->flags[i] || reg_value == flag_list->flags[i])
+		if (reg_value & flag_list->flags[i] || reg_value == (unsigned long)flag_list->flags[i])
 		{
 			if (s)
 			{

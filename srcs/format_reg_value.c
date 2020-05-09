@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/07 14:30:24 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/09 21:17:15 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 22:25:06 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,13 +168,12 @@ static char		*get_fmt_string_tab(pid_t child, unsigned long reg_value)
 static char		*get_vars(pid_t child, unsigned long reg_value)
 {
 	unsigned int		i;
-	unsigned long		data;
 	char				*fmt;
 
 	i = 0;
 	while (ptrace(PTRACE_PEEKDATA, child, reg_value + (i * sizeof(char *))))
 		i++;
-	asprintf(&fmt, "%p /* %d vars */", reg_value, i);
+	asprintf(&fmt, "%p /* %d vars */", (void *)reg_value, i);
 	return (fmt);
 }
 
@@ -202,12 +201,12 @@ char			*format_reg_value(pid_t child, int type, \
 		asprintf(&ret, printf_fmt_types_str[fmt_index], reg_value);
 	else if (type == PTR || type == STRUCT)
 		reg_value ? \
-			asprintf(&ret, "%p", reg_value) : \
+			asprintf(&ret, "%p", (void *)reg_value) : \
 			asprintf(&ret, "NULL");
 	else if (type == HEX)
 		reg_value ? \
-			asprintf(&ret, "%p", reg_value) : \
-			asprintf(&ret, "0", reg_value);
+			asprintf(&ret, "%p", (void *)reg_value) : \
+			asprintf(&ret, "0");
 	else if (type == STR)
 		ret = get_fmt_string(child, reg_value, false, 0);
 	else if (type == BUFFER && pre_user_regs)

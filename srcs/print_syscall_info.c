@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/03 16:34:28 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/09 21:02:33 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 21:57:12 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,8 +88,6 @@ static int		print_valid_pre_syscall(pid_t process, unsigned char bin_elf_class, 
 	int		printed;
 	char	*ret;
 
-	// dprintf(INFO_FD, INFO_PREFIX "[%d] => (%3lld) %s", \
-	// 	process, user_regs->orig_rax, table[user_regs->orig_rax].name);
 	printed = 0;
 	if (!regs_offset)
 		printed += dprintf(INFO_FD, "%s(", table[user_regs->orig_rax].name);

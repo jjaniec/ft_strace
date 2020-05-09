@@ -6,7 +6,7 @@
 /*   By: jjaniec <jjaniec@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/11 15:09:50 by jjaniec           #+#    #+#             */
-/*   Updated: 2020/05/09 20:06:17 by jjaniec          ###   ########.fr       */
+/*   Updated: 2020/05/09 22:43:00 by jjaniec          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,25 @@ static void	cont_syscall_sig(pid_t child, int *status, void *ptrace_syscall_data
 	block_sigs();
 }
 
+/*
+** union sigval {
+** 	int sival_int;
+** 	void *sival_ptr;
+** };
+**
+** typedef struct {
+** 	int si_signo;
+** 	int si_code;
+** 	union sigval si_value;
+** 	int si_errno;
+** 	pid_t si_pid;
+** 	uid_t si_uid;
+** 	void *si_addr;
+** 	int si_status;
+** 	int si_band;
+** } siginfo_t;
+*/
+
 static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
 				int *status, siginfo_t *status_siginfo)
 {
@@ -127,7 +146,7 @@ static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
 			ft_memset(&syscall_time_end, 0, sizeof(struct timeval));
 			gettimeofday(&syscall_time, NULL);
 		}
-		cont_syscall_sig(child, status, (void *)status_siginfo->si_signo);
+		cont_syscall_sig(child, status, (void *)(uintptr_t)(status_siginfo->si_signo));
 		ptrace(PTRACE_GETREGS, child, NULL, &user_regs);
 		orig_rax = user_regs.orig_rax;
 		if (orig_rax > table_size)
@@ -136,7 +155,7 @@ static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
 			!(printed = print_syscall_info(child, PRE_SYSCALL_REGS, \
 			bin_elf_class, &user_regs, table, 0, 6)))
 			return (1);
-		cont_syscall_sig(child, status, (void *)status_siginfo->si_signo);
+		cont_syscall_sig(child, status, (void *)(uintptr_t)(status_siginfo->si_signo));
 		if (g_ft_strace_opts->c)
 		{
 			gettimeofday(&syscall_time_end, NULL);
@@ -147,8 +166,7 @@ static int	handle_syscall_sig(pid_t child, unsigned char bin_elf_class, \
 				&syscall_time);
 		}
 		if (g_ft_strace_opts->c)
-			update_syscall_exec_infos(bin_elf_class, g_syscall_table_32, g_syscall_table_64, \
-				*g_ft_strace_exec_infos, &user_regs);
+			update_syscall_exec_infos(bin_elf_class, *g_ft_strace_exec_infos, &user_regs);
 		ptrace(PTRACE_GETREGS, child, NULL, &user_regs);
 		if (!g_ft_strace_opts->c && \
 				!(printed += print_syscall_info(child, POST_SYSCALL_REGS, \
