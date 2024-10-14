@@ -1,10 +1,10 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 fail_fast: false
-default_stages: [commit, push]
+default_stages: [pre-commit, pre-push]
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.5.0
+  rev: v5.0.0
   hooks:
   - id: check-yaml
   - id: check-executables-have-shebangs
@@ -12,17 +12,17 @@ repos:
     args: [--branch, master]
 
 - repo: https://github.com/jumanjihouse/pre-commit-hooks
-  rev: 1.11.2
+  rev: 3.0.0
   hooks:
   - id: git-check
 
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.1.7
+  rev: v1.5.5
   hooks:
   - id: remove-crlf
 
 - repo: https://gitlab.com/devopshq/gitlab-ci-linter
-  rev: v1.0.0
+  rev: v1.0.6
   hooks:
   - id: gitlab-ci-linter
 
@@ -32,12 +32,12 @@ repos:
   - id: dockerfilelint
 
 - repo: https://github.com/homebysix/pre-commit-macadmin
-  rev: master
+  rev: v1.16.2
   hooks:
   - id: check-git-config-email
     args: ['--domains', 'student.42.fr']
 
 - repo: https://github.com/doublify/pre-commit-clang-format
-  rev: master
+  rev: 62302476d0da01515660132d76902359bed0f782
   hooks:
   - id: clang-format
